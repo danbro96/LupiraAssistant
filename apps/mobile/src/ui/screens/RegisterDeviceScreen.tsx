@@ -122,6 +122,7 @@ export function RegisterDeviceScreen() {
             value={label}
             onChangeText={setLabel}
             autoCapitalize="words"
+            style={styles.field}
           />
           <Button title="Register this phone" onPress={() => void handleRegister()} loading={busy} />
         </>
@@ -140,6 +141,9 @@ const makeStyles = (c: Palette) =>
     subtitle: { color: c.textMuted, textAlign: 'center', marginBottom: spacing.lg },
     step: { color: c.textSubtle, marginTop: spacing.md },
     signedIn: { color: c.textMuted },
+    // TextField is `flex: 1` (basis 0) for rows; in this full-height column that stretches it, and
+    // flexGrow: 0 alone collapses it — override `flex` itself.
+    field: { flex: 0 },
     spinner: { marginTop: spacing.md },
     error: { color: c.danger, textAlign: 'center', marginTop: spacing.md },
   });

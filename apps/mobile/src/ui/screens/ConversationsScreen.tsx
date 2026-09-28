@@ -80,7 +80,7 @@ export function ConversationsScreen() {
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: c.bg },
-    filter: { margin: spacing.lg, marginBottom: spacing.sm },
+    filter: { flex: 0, margin: spacing.lg, marginBottom: spacing.sm },
     list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg, gap: spacing.sm },
     card: cardSurface(c),
     header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: spacing.sm },
