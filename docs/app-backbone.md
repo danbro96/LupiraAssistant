@@ -47,7 +47,7 @@ graph TD
   data --> domain
 ```
 
-- **Auth** — Authentik OIDC public PKCE (`expo-auth-session`), client `lupira-assistant`, tokens in SecureStore, on-demand refresh with single-flight dedup and a definitive-vs-transient split ([src/data/auth/oidc.ts](../apps/mobile/src/data/auth/oidc.ts), [src/state/auth-store.ts](../apps/mobile/src/state/auth-store.ts)). The data layer reaches the live token through auth-ports, never importing `state`.
+- **Auth** — Authentik OIDC public PKCE (`expo-auth-session`), client `lupira-assistant-mobile`, tokens in SecureStore, on-demand refresh with single-flight dedup and a definitive-vs-transient split ([src/data/auth/oidc.ts](../apps/mobile/src/data/auth/oidc.ts), [src/state/auth-store.ts](../apps/mobile/src/state/auth-store.ts)). The data layer reaches the live token through auth-ports, never importing `state`.
 - **Device identity** — registration mints a location-api `DeviceKey` (`Authorization: DeviceKey {apiKey}`), SecureStore-only ([src/data/api/registration.ts](../apps/mobile/src/data/api/registration.ts)). This is the **ingest** credential; assistant-api is called with the **OIDC bearer** — a separate credential.
 - **Store-and-forward queue** — a **multi-stream** offline pipeline: SQLite `pending_*` tables, a `sync_state(device_id, stream, …)` cursor, a monotonic per-stream `seq` keyed for `location`/`ring`/`summaries` ([src/domain/seq.ts](../apps/mobile/src/domain/seq.ts)), NDJSON batch upload, and **idempotent receipt apply** that deletes accepted / drops permanent rejects / retries transients ([src/domain/receipt-apply.ts](../apps/mobile/src/domain/receipt-apply.ts), [src/sync/uploader.ts](../apps/mobile/src/sync/uploader.ts), [src/sync/sync-engine.ts](../apps/mobile/src/sync/sync-engine.ts)). Because the queue is already stream-keyed, a new `acks` stream is an addition, not a rewrite.
 - **Reliability** — a server-driven **pause** kill-switch honored by the uploader ([src/sync/pause-poll.ts](../apps/mobile/src/sync/pause-poll.ts)); **cursor-resume** seeds `seq` to max(local, server cursor) so a reinstall can't reuse sequence numbers ([src/sync/cursor-resume.ts](../apps/mobile/src/sync/cursor-resume.ts)); Sentry error boundary at the root.
@@ -55,8 +55,8 @@ graph TD
 
 ## Credentials & grant enrollment
 **Two distinct credentials are established at sign-in** — kept separate to avoid confusion:
-1. **App session** — the public PKCE client `lupira-assistant`; its bearer authorizes the app's own calls to the assistant-api REST surface. The `offline_access` on this client is the *app's* session longevity. (assistant-api must be a valid audience for this client — see Open decisions.)
-2. **Assistant-api offline grant** — assistant-api is a **confidential** Authentik client. The grant is a per-user refresh token minted to **assistant-api** (encrypted, schema `assistant`), letting it write on-behalf-of the user when the user is absent (a 3am fired prompt). The app does not hold this token; it only triggers its creation.
+1. **App session** — the public PKCE client `lupira-assistant-mobile`; its bearer authorizes the app's calls through the BFF (assistant-api, comms-api) and device registration on location-api + health-api, via the `lupira-{assistant,comms,location,health}-aud` scope mappings. The `offline_access` on this client is the *app's* session longevity.
+2. **Assistant-api offline grant** — assistant-api is the **confidential** Authentik client `lupira-assistant`. The grant is a per-user refresh token minted to **assistant-api** (encrypted, schema `assistant`), letting it write on-behalf-of the user when the user is absent (a 3am fired prompt). The app does not hold this token; it only triggers its creation.
 
 **Grant enrollment is assistant-api-led.** The app launches the hub's hosted flow (`expo-web-browser`) and the server owns the auth-code dance:
 1. App completes PKCE login → app session token.
@@ -148,6 +148,5 @@ Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqu
 10. ✅ **Inbox freshness = pull-on-open** (plus the push wake), no poll loop.
 
 ## Open decisions
-- **Audience config** — confirm the `lupira-assistant` PKCE client carries the BFF + comms audiences so one token satisfies every hop.
 - **Push credential ownership** — Expo-managed credentials vs a self-hosted APNs key / FCM project.
 - **Orval + NDJSON** — keep ingest as a custom request fn through the shared mutator (recommended) vs leaving ingest fully hand-written outside Orval.
