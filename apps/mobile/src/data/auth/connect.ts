@@ -15,7 +15,7 @@ export const CONNECT_RETURN_URL = `${OIDC_SCHEME}://connected`;
 // (Auth:Offline:AllowedReturnUris); /auth/done 302s back to it when the grant is captured.
 function connectUrl(apiUrl: string): string {
   const ret = encodeURIComponent(CONNECT_RETURN_URL);
-  return `${joinUrl(apiUrl, '/api/assistant/auth/login')}?return_uri=${ret}`;
+  return `${joinUrl(apiUrl, '/api/auth/login')}?return_uri=${ret}`;
 }
 
 export type ConnectResult = 'returned' | 'dismissed';

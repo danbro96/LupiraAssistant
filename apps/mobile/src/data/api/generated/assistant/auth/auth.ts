@@ -10,7 +10,7 @@ import type {
   ProblemDetails
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type getAuthStatusResponse200 = {
   data: AuthStatusResponse
@@ -41,15 +41,15 @@ export const getGetAuthStatusUrl = () => {
 
 
 
-  return `/api/assistant/auth/status`
+  return `/api/auth/status`
 }
 
 /**
  * @summary Whether the caller has a live offline grant (and for which audiences).
  */
-export const getAuthStatus = async ( options?: Parameters<typeof apiFetchAssistant>[1]): Promise<getAuthStatusResponse> => {
+export const getAuthStatus = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getAuthStatusResponse> => {
 
-  return apiFetchAssistant<getAuthStatusResponse>(getGetAuthStatusUrl(),
+  return apiFetch<getAuthStatusResponse>(getGetAuthStatusUrl(),
   {
     ...options,
     method: 'GET'

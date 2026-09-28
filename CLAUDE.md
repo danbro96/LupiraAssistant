@@ -19,9 +19,11 @@
   (boundaries already forbids `collector`/`sync` → `ui`).
 - **API clients are generated**: orval → `src/data/api/generated/` (never hand-edit). `client: 'fetch'`,
   not react-query — assistant reads come from the BFF and the inbox cache.
-- **Dev backend switching**: `API_PRESETS` in `config/env.ts` carries all three origins per preset
-  (assistant / location / health); Settings → Developer switches at runtime. `authMode: 'dev'` swaps
-  the bearer for `X-Dev-User`, which all three upstreams accept only in Development. The emulator
+- **One origin — the BFF** (CalWeb's shape): every call, device ingest included, goes through
+  `src/LupiraAssistantWeb`; only `exposed.json` entries are routed. A new upstream endpoint the app
+  calls needs a line there. `API_PRESETS` in `config/env.ts` holds that one origin per preset;
+  Settings → Developer switches at runtime. `authMode: 'dev'` swaps the bearer for `X-Dev-User`,
+  which the BFF and every upstream accept only in Development. The emulator
   preset uses `10.0.2.2` — a LAN IP is unreachable from one.
 - **Picker choice is by option-set shape, not by app**: `SegmentedPicker` (Paper `SegmentedButtons`)
   for a fixed 2–5 required set; `ChoiceChips` (a wrapping Paper `Chip` row) for dynamic/unbounded sets

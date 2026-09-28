@@ -46,7 +46,7 @@ export function DeveloperScreen() {
           left={() => <RadioButton status={activeKey === 'custom' ? 'checked' : 'unchecked'} value="custom" />}
         />
         <TextField
-          label="http://host:5285"
+          label="http://host:5183"
           autoCapitalize="none"
           autoCorrect={false}
           value={customUrl}

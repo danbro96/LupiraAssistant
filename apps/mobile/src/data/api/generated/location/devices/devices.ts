@@ -13,7 +13,7 @@ import type {
   RenameDeviceRequest
 } from '../models';
 
-import { apiFetchLocation } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type listDevicesResponse200 = {
   data: DeviceDto[]
@@ -44,15 +44,15 @@ export const getListDevicesUrl = () => {
 
 
 
-  return `/devices`
+  return `/location-api/devices`
 }
 
 /**
  * @summary List the caller's registered location-tracking devices.
  */
-export const listDevices = async ( options?: Parameters<typeof apiFetchLocation>[1]): Promise<listDevicesResponse> => {
+export const listDevices = async ( options?: Parameters<typeof apiFetch>[1]): Promise<listDevicesResponse> => {
 
-  return apiFetchLocation<listDevicesResponse>(getListDevicesUrl(),
+  return apiFetch<listDevicesResponse>(getListDevicesUrl(),
   {
     ...options,
     method: 'GET'
@@ -96,13 +96,13 @@ export const getRegisterDeviceUrl = () => {
 
 
 
-  return `/devices`
+  return `/location-api/devices`
 }
 
 /**
  * @summary Register a device; returns the one-time ingest API key.
  */
-export const registerDevice = async (registerDeviceRequest: RegisterDeviceRequest, options?: Parameters<typeof apiFetchLocation>[1]): Promise<registerDeviceResponse> => {
+export const registerDevice = async (registerDeviceRequest: RegisterDeviceRequest, options?: Parameters<typeof apiFetch>[1]): Promise<registerDeviceResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -118,7 +118,7 @@ export const registerDevice = async (registerDeviceRequest: RegisterDeviceReques
     }
     return headers;
   };
-return apiFetchLocation<registerDeviceResponse>(getRegisterDeviceUrl(),
+return apiFetch<registerDeviceResponse>(getRegisterDeviceUrl(),
   {
     ...options,
     method: 'POST',
@@ -172,14 +172,14 @@ export const getRenameDeviceUrl = (id: string,) => {
 
 
 
-  return `/devices/${id}`
+  return `/location-api/devices/${id}`
 }
 
 /**
  * @summary Rename a device.
  */
 export const renameDevice = async (id: string,
-    renameDeviceRequest: RenameDeviceRequest, options?: Parameters<typeof apiFetchLocation>[1]): Promise<renameDeviceResponse> => {
+    renameDeviceRequest: RenameDeviceRequest, options?: Parameters<typeof apiFetch>[1]): Promise<renameDeviceResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -195,7 +195,7 @@ export const renameDevice = async (id: string,
     }
     return headers;
   };
-return apiFetchLocation<renameDeviceResponse>(getRenameDeviceUrl(id),
+return apiFetch<renameDeviceResponse>(getRenameDeviceUrl(id),
   {
     ...options,
     method: 'PUT',
@@ -244,15 +244,15 @@ export const getRetireDeviceUrl = (id: string,) => {
 
 
 
-  return `/devices/${id}`
+  return `/location-api/devices/${id}`
 }
 
 /**
  * @summary Retire a device (revokes its ingest keys).
  */
-export const retireDevice = async (id: string, options?: Parameters<typeof apiFetchLocation>[1]): Promise<retireDeviceResponse> => {
+export const retireDevice = async (id: string, options?: Parameters<typeof apiFetch>[1]): Promise<retireDeviceResponse> => {
 
-  return apiFetchLocation<retireDeviceResponse>(getRetireDeviceUrl(id),
+  return apiFetch<retireDeviceResponse>(getRetireDeviceUrl(id),
   {
     ...options,
     method: 'DELETE'

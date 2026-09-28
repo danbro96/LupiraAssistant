@@ -20,15 +20,16 @@ The client side is an npm-workspaces monorepo (the LupiraCalWeb pattern), so the
 | `packages/domain` | `@lupira/assistant-domain`: shared pure TS (inbox mapping, ack classification, edit specs, thread paging), consumed as source, vitest-tested, kept dependency-free by its own eslint config. |
 | `src/LupiraAssistantWeb` | The **BFF**: .NET 10, Authentik bearer + YARP. The future SPA lands beside it. |
 
-**One public backend.** The app talks to the BFF only; the path prefix picks the upstream (`/api/assistant` → assistant-api, `/api/comms` → comms-api). The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so both can drop off the public edge. It re-announces the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs. HealthApi and location-api stay direct spokes (device-key ingest, unchanged).
+**One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`, `/location-api`, `/health-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. Device ingest (`/ingest/*`) is routed at the upstream's own path, unauthenticated at the BFF because only the upstream holds the device keys; the BFF rejects a malformed `DeviceKey` header and passes a well-formed one through untouched. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
 
 ```mermaid
 flowchart LR
   APP[apps/mobile] -->|bearer| BFF[assistant.lupira.com<br/>LupiraAssistantWeb]
-  BFF -->|/api/assistant| HUB[assistant-api · LAN]
-  BFF -->|/api/comms| COMMS[comms-api · LAN]
-  APP -->|DeviceKey ingest| LOC[location-api]
-  APP --> HEALTH[health-api]
+  APP -->|DeviceKey /ingest| BFF
+  BFF -->|/api| HUB[assistant-api · LAN]
+  BFF -->|/comms-api| COMMS[comms-api · LAN]
+  BFF -->|/location-api + /ingest/location| LOC[location-api · LAN]
+  BFF -->|/health-api + /ingest/ring,summaries| HEALTH[health-api · LAN]
   HUB -->|content-minimal wake| EXPO[Expo → FCM/APNs]
 ```
 
@@ -51,7 +52,7 @@ graph TD
 - **Device identity** — registration mints a location-api `DeviceKey` (`Authorization: DeviceKey {apiKey}`), SecureStore-only ([src/data/api/registration.ts](../apps/mobile/src/data/api/registration.ts)). This is the **ingest** credential; assistant-api is called with the **OIDC bearer** — a separate credential.
 - **Store-and-forward queue** — a **multi-stream** offline pipeline: SQLite `pending_*` tables, a `sync_state(device_id, stream, …)` cursor, a monotonic per-stream `seq` keyed for `location`/`ring`/`summaries` ([src/domain/seq.ts](../apps/mobile/src/domain/seq.ts)), NDJSON batch upload, and **idempotent receipt apply** that deletes accepted / drops permanent rejects / retries transients ([src/domain/receipt-apply.ts](../apps/mobile/src/domain/receipt-apply.ts), [src/sync/uploader.ts](../apps/mobile/src/sync/uploader.ts), [src/sync/sync-engine.ts](../apps/mobile/src/sync/sync-engine.ts)). Because the queue is already stream-keyed, a new `acks` stream is an addition, not a rewrite.
 - **Reliability** — a server-driven **pause** kill-switch honored by the uploader ([src/sync/pause-poll.ts](../apps/mobile/src/sync/pause-poll.ts)); **cursor-resume** seeds `seq` to max(local, server cursor) so a reinstall can't reuse sequence numbers ([src/sync/cursor-resume.ts](../apps/mobile/src/sync/cursor-resume.ts)); Sentry error boundary at the root.
-- **Backends** — API bases `health | location | assistant` (the last now the BFF origin) ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)): HealthApi (bootstrap/records + the ring/summaries streams, its own device key), location-api (fix ingest, `DeviceKey`), the assistant BFF (OIDC bearer, fronting assistant-api + comms-api). HealthApi and location-api are direct spokes, not behind the BFF.
+- **Backend** — one origin, the BFF ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)); each generated client carries its upstream's BFF prefix. Two mutators: `apiFetch` (OIDC bearer) and `deviceKeyFetch` (location fix ingest + health ring/summaries, `DeviceKey`).
 
 ## Credentials & grant enrollment
 **Two distinct credentials are established at sign-in** — kept separate to avoid confusion:
@@ -100,7 +101,7 @@ Everything slots into the **existing** element types — no new layer, no `eslin
 ## API integration
 The app consumes both backends through Orval-generated clients — one target per upstream, each with its BFF prefix baked into `baseUrl`, so a call site never knows which host answers. Specs come from the API repos' build output (`npm run fetch:openapi`), never a running server.
 
-**assistant-api** (`/api/assistant`):
+**assistant-api** (`/api`):
 
 | Endpoint | Purpose |
 |---|---|
@@ -114,7 +115,7 @@ The app consumes both backends through Orval-generated clients — one target pe
 | `POST /notices/{id}/read` | `{clientActionId}` |
 | `POST /push-tokens` · `DELETE /push-tokens/{token}` | Register / drop the Expo token |
 
-**comms-api** (`/api/comms`):
+**comms-api** (`/comms-api`):
 
 | Endpoint | Purpose |
 |---|---|
@@ -136,7 +137,7 @@ Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqu
 - **Self-hosted map view** — render the user's own location history (the brief's deferred "Map view"); the heaviest future item, a tiles surface rather than a connector.
 
 ## Decisions
-1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantWeb`; `/api/assistant` + `/api/comms` prefixes pick the upstream, and the bearer is forwarded verbatim (upstreams re-validate). Lets assistant-api and comms-api leave the public edge, and gives the future SPA a same-origin home.
+1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantWeb`, CalWeb's shape: an `exposed.json` allowlist, `/api` + `/<name>-api` prefixes, device ingest at the upstream's path, the bearer forwarded verbatim (upstreams re-validate). No upstream sits on the public edge, and the future SPA gets a same-origin home.
 2. ✅ **Monorepo** — mobile + BFF + shared domain in one repo (the cal-web pattern), so pure logic is shared as source instead of copied.
 3. ✅ **Enrollment return leg via `return_uri`** — the hub takes an allow-listed `return_uri` and `/auth/done` 302s to the app's deep link; the allowlist is what keeps it from being an open redirect.
 4. ✅ **One merged `/inbox` feed** with a kind discriminator (proposal · question · notice), not per-kind endpoints — the app renders one chronological queue, so one fetch matches the surface.

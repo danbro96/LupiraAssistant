@@ -12,7 +12,7 @@ import type {
   TrackingStateDto
 } from '../models';
 
-import { deviceKeyFetchLocation } from '../../../mutators';
+import { deviceKeyFetch } from '../../../mutators';
 
 export type ingestLocationResponse202 = {
   data: LocationIngestReceipt
@@ -49,7 +49,7 @@ export const getIngestLocationUrl = () => {
 /**
  * @summary Ingest a batch of GPS fixes (NDJSON, one fix per line).
  */
-export const ingestLocation = async (ingestLocationBody: string, options?: Parameters<typeof deviceKeyFetchLocation>[1]): Promise<ingestLocationResponse> => {
+export const ingestLocation = async (ingestLocationBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<ingestLocationResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -65,7 +65,7 @@ export const ingestLocation = async (ingestLocationBody: string, options?: Param
     }
     return headers;
   };
-return deviceKeyFetchLocation<ingestLocationResponse>(getIngestLocationUrl(),
+return deviceKeyFetch<ingestLocationResponse>(getIngestLocationUrl(),
   {
     ...options,
     method: 'POST',
@@ -110,9 +110,9 @@ export const getGetIngestCursorUrl = () => {
 /**
  * @summary The device's resume cursor (last accepted seq + ts).
  */
-export const getIngestCursor = async ( options?: Parameters<typeof deviceKeyFetchLocation>[1]): Promise<getIngestCursorResponse> => {
+export const getIngestCursor = async ( options?: Parameters<typeof deviceKeyFetch>[1]): Promise<getIngestCursorResponse> => {
 
-  return deviceKeyFetchLocation<getIngestCursorResponse>(getGetIngestCursorUrl(),
+  return deviceKeyFetch<getIngestCursorResponse>(getGetIngestCursorUrl(),
   {
     ...options,
     method: 'GET'
@@ -157,9 +157,9 @@ export const getGetIngestStateUrl = () => {
 /**
  * @summary Whether tracking is paused for this device (the uploader should stop collecting if so).
  */
-export const getIngestState = async ( options?: Parameters<typeof deviceKeyFetchLocation>[1]): Promise<getIngestStateResponse> => {
+export const getIngestState = async ( options?: Parameters<typeof deviceKeyFetch>[1]): Promise<getIngestStateResponse> => {
 
-  return deviceKeyFetchLocation<getIngestStateResponse>(getGetIngestStateUrl(),
+  return deviceKeyFetch<getIngestStateResponse>(getGetIngestStateUrl(),
   {
     ...options,
     method: 'GET'

@@ -10,7 +10,7 @@ import type {
   ProblemDetails
 } from '../models';
 
-import { apiFetchLocation } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type whoAmIResponse200 = {
   data: MeDto
@@ -41,15 +41,15 @@ export const getWhoAmIUrl = () => {
 
 
 
-  return `/me`
+  return `/location-api/me`
 }
 
 /**
  * @summary The caller's resolved local identity (JIT-provisioned on first login).
  */
-export const whoAmI = async ( options?: Parameters<typeof apiFetchLocation>[1]): Promise<whoAmIResponse> => {
+export const whoAmI = async ( options?: Parameters<typeof apiFetch>[1]): Promise<whoAmIResponse> => {
 
-  return apiFetchLocation<whoAmIResponse>(getWhoAmIUrl(),
+  return apiFetch<whoAmIResponse>(getWhoAmIUrl(),
   {
     ...options,
     method: 'GET'

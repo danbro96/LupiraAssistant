@@ -14,7 +14,7 @@ The idea is sound and the design fits the core goal: the LLM runs at only two en
 | tasks-api | Ahead of its own doc: relations, `ListKind.Agent`, rich `ItemStatus`, metadata shipped. 16 MCP tools. No scheduler (non-goal honored). |
 | gpt-api | Deployed: strict `response_format` json_schema→GBNF + response-vs-schema validation (batch 2); tool defs forwarded blind (no executor), token budgets unenforced. |
 | comms-api | Built end-to-end: Telegram userbot, **live IMAP mail connector** + mbox/Maildir import, semantic segmentation, durable outbox push, Facebook backfill importer, MCP `archive_search` + topic reads, and the owner REST archive surface (search / conversations / thread paging / connector status). |
-| BFF (`LupiraAssistantWeb`) | Built: bearer-authed YARP over `/api/assistant` + `/api/comms`, `X-Forwarded-Prefix` for the hub's proxied enrollment, hermetic integration tests, CI + deploy config. **Not yet deployed** (tunnel + Authentik redirect URI pending). |
+| BFF (`LupiraAssistantWeb`) | Built: bearer-authed YARP over an `exposed.json` allowlist (assistant, comms, location, health + device ingest), `X-Forwarded-Prefix` for the hub's proxied enrollment, hermetic integration tests, CI + deploy config. **Not yet deployed** (image, tunnel + Authentik redirect URI pending). |
 | Mobile app | The canonical surface, live against the hub: inbox (proposals/questions/notices), schema-driven edit forms for all four kinds, offline `acks` queue, archive browser, Expo push, connector status + preferences, Inbox/Archive tabs. Location pipeline unchanged. |
 
 Agent tool surface (MCP `/mcp`, LAN-only): cal 17 · tasks 16 · career 10 (rw) · health 5 (ro) · location 7 (ro, coarse) · LlmUtility ~28 (deterministic) · LlmSandbox `run_code` · DevOps 10. assistant-api exposes none (consumer — correct).
@@ -74,8 +74,7 @@ P0 core loop is live end-to-end (intake → contracted run → validation → po
 - Stale code comments: `OnBehalfOfTokenProvider` claims the runner parks fires; `GatewayClient`/`GatewayOptions` comment calls `JsonObject` the default (actual = `JsonSchema`).
 
 ### BFF (`src/LupiraAssistantWeb`)
-Built + tested; **deployment pending**. Cutover checklist in the DevOps repo (`WebApps/lupira-assistant-web/README.md`): Cloudflare Tunnel entry for `assistant.lupira.com` → `:41781`, the added Authentik redirect URI (`…/api/assistant/auth/callback`, keeping the direct one until the app rollout completes), then dropping `assistant-api`/`comms-api` from the tunnel once traffic is BFF-only.
-- Comms-api must accept the app client's audience for `/api/comms` to authorize (its bearer config; the same mechanism cal-api uses behind CalWeb).
+Built + tested; **deployment pending**. Cutover checklist in the DevOps repo (`WebApps/lupira-assistant-web/deployment.md`): a published image (release CI's Docker Hub login fails), the Cloudflare Tunnel entry for `assistant.lupira.com` → `:41781`, and the Authentik redirect URI `…/api/auth/callback` on the `assistant` provider.
 - No cookie/interactive scheme yet — bearer only, since there's no SPA. It lands with `src/LupiraAssistantWeb.Client`.
 
 ### Mobile app

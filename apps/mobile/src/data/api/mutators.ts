@@ -1,15 +1,15 @@
-import { oidcAuthPort, deviceKeyPort, type ApiBase } from './auth-ports';
+import { oidcAuthPort, deviceKeyPort } from './auth-ports';
 import { coreFetch, joinUrl } from './http';
 import { ApiError, DeviceKeyInvalidError } from '../../domain/api-error';
 import { buildDeviceKeyHeader } from '../../domain/device-key-auth';
 import { isRetriableRequest } from '../../domain/retry-policy';
 import { DEV_USER } from '../../config/env';
 
-// One mutator per (backend, auth scheme) pair — Orval binds a single mutator per generation target.
+// One mutator per auth scheme — every target shares the BFF origin, and the path carries its prefix.
 
-async function oidcFetch<T>(base: ApiBase, path: string, init: RequestInit = {}): Promise<T> {
+export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const auth = oidcAuthPort();
-  const apiUrl = auth.getApiUrl(base);
+  const apiUrl = auth.getApiUrl();
   if (!apiUrl) throw new ApiError(0, 'API base URL is not configured.');
 
   const method = init.method ?? 'GET';
@@ -45,7 +45,7 @@ async function oidcFetch<T>(base: ApiBase, path: string, init: RequestInit = {})
 
 // Reads the live key each call so rotation/clear takes effect immediately; 401 = revoked key → re-register,
 // not OIDC re-auth.
-async function deviceFetch<T>(base: ApiBase, path: string, init: RequestInit = {}): Promise<T> {
+export async function deviceKeyFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const port = deviceKeyPort();
   const apiKey = await port.getApiKey();
   if (!apiKey) throw new ApiError(0, 'No device key — register this device first.');
@@ -56,7 +56,7 @@ async function deviceFetch<T>(base: ApiBase, path: string, init: RequestInit = {
 
   try {
     const res = await coreFetch(
-      joinUrl(port.getApiUrl(base), path),
+      joinUrl(port.getApiUrl(), path),
       { ...init, headers, body: rawBody(headers, init.body) },
       { retriable: true },
     );
@@ -88,8 +88,3 @@ async function envelope<T>(res: Response): Promise<T> {
   return { status: res.status, data, headers: res.headers } as T;
 }
 
-export const apiFetchLocation = <T>(path: string, init?: RequestInit): Promise<T> => oidcFetch<T>('location', path, init);
-export const apiFetchHealth = <T>(path: string, init?: RequestInit): Promise<T> => oidcFetch<T>('health', path, init);
-export const apiFetchAssistant = <T>(path: string, init?: RequestInit): Promise<T> => oidcFetch<T>('assistant', path, init);
-export const deviceKeyFetchLocation = <T>(path: string, init?: RequestInit): Promise<T> => deviceFetch<T>('location', path, init);
-export const deviceKeyFetchHealth = <T>(path: string, init?: RequestInit): Promise<T> => deviceFetch<T>('health', path, init);

@@ -10,7 +10,7 @@ import type {
   RingIngestReceipt
 } from '../models';
 
-import { deviceKeyFetchHealth } from '../../../mutators';
+import { deviceKeyFetch } from '../../../mutators';
 
 export type ingestRingSamplesResponse202 = {
   data: RingIngestReceipt
@@ -47,7 +47,7 @@ export const getIngestRingSamplesUrl = () => {
 /**
  * @summary Ingest a batch of ring point-samples (NDJSON).
  */
-export const ingestRingSamples = async (ingestRingSamplesBody: string, options?: Parameters<typeof deviceKeyFetchHealth>[1]): Promise<ingestRingSamplesResponse> => {
+export const ingestRingSamples = async (ingestRingSamplesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<ingestRingSamplesResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -63,7 +63,7 @@ export const ingestRingSamples = async (ingestRingSamplesBody: string, options?:
     }
     return headers;
   };
-return deviceKeyFetchHealth<ingestRingSamplesResponse>(getIngestRingSamplesUrl(),
+return deviceKeyFetch<ingestRingSamplesResponse>(getIngestRingSamplesUrl(),
   {
     ...options,
     method: 'POST',
@@ -108,7 +108,7 @@ export const getIngestSummariesUrl = () => {
 /**
  * @summary Ingest a batch of device-computed summaries (NDJSON).
  */
-export const ingestSummaries = async (ingestSummariesBody: string, options?: Parameters<typeof deviceKeyFetchHealth>[1]): Promise<ingestSummariesResponse> => {
+export const ingestSummaries = async (ingestSummariesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<ingestSummariesResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -124,7 +124,7 @@ export const ingestSummaries = async (ingestSummariesBody: string, options?: Par
     }
     return headers;
   };
-return deviceKeyFetchHealth<ingestSummariesResponse>(getIngestSummariesUrl(),
+return deviceKeyFetch<ingestSummariesResponse>(getIngestSummariesUrl(),
   {
     ...options,
     method: 'POST',

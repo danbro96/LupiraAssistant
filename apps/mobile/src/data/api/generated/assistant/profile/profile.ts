@@ -13,7 +13,7 @@ import type {
   RoutingUpdateRequest
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type getProfileResponse200 = {
   data: ProfileResponse
@@ -44,15 +44,15 @@ export const getGetProfileUrl = () => {
 
 
 
-  return `/api/assistant/me/profile`
+  return `/api/me/profile`
 }
 
 /**
  * @summary Get the caller's assistant profile (routing defaults).
  */
-export const getProfile = async ( options?: Parameters<typeof apiFetchAssistant>[1]): Promise<getProfileResponse> => {
+export const getProfile = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getProfileResponse> => {
 
-  return apiFetchAssistant<getProfileResponse>(getGetProfileUrl(),
+  return apiFetch<getProfileResponse>(getGetProfileUrl(),
   {
     ...options,
     method: 'GET'
@@ -91,13 +91,13 @@ export const getSetProfileRoutingUrl = () => {
 
 
 
-  return `/api/assistant/me/profile/routing`
+  return `/api/me/profile/routing`
 }
 
 /**
  * @summary Set routing defaults (calendar/list/address-book) the assistant writes to.
  */
-export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<setProfileRoutingResponse> => {
+export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<setProfileRoutingResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -113,7 +113,7 @@ export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateReque
     }
     return headers;
   };
-return apiFetchAssistant<setProfileRoutingResponse>(getSetProfileRoutingUrl(),
+return apiFetch<setProfileRoutingResponse>(getSetProfileRoutingUrl(),
   {
     ...options,
     method: 'PUT',
@@ -152,15 +152,15 @@ export const getGetPreferencesUrl = () => {
 
 
 
-  return `/api/assistant/me/preferences`
+  return `/api/me/preferences`
 }
 
 /**
  * @summary Get delivery preferences (per-item vs digest, quiet hours).
  */
-export const getPreferences = async ( options?: Parameters<typeof apiFetchAssistant>[1]): Promise<getPreferencesResponse> => {
+export const getPreferences = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getPreferencesResponse> => {
 
-  return apiFetchAssistant<getPreferencesResponse>(getGetPreferencesUrl(),
+  return apiFetch<getPreferencesResponse>(getGetPreferencesUrl(),
   {
     ...options,
     method: 'GET'
@@ -204,13 +204,13 @@ export const getSetPreferencesUrl = () => {
 
 
 
-  return `/api/assistant/me/preferences`
+  return `/api/me/preferences`
 }
 
 /**
  * @summary Set delivery preferences. Quiet hours suppress the push only — items still land in the inbox.
  */
-export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<setPreferencesResponse> => {
+export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<setPreferencesResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -226,7 +226,7 @@ export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdate
     }
     return headers;
   };
-return apiFetchAssistant<setPreferencesResponse>(getSetPreferencesUrl(),
+return apiFetch<setPreferencesResponse>(getSetPreferencesUrl(),
   {
     ...options,
     method: 'PUT',

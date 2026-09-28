@@ -30,8 +30,6 @@ export function SettingsScreen() {
   const device = useDevice();
   const collector = useCollector();
   const status = useSyncStatus();
-  const locationApiUrl = useAuth((s) => s.locationApiUrl);
-  const healthApiUrl = useAuth((s) => s.healthApiUrl);
   const apiUrl = useAuth((s) => s.apiUrl);
   const grantStatus = useInbox((s) => s.grantStatus);
   const mirror = useSyncStatus((s) => s.mirror);
@@ -150,11 +148,6 @@ export function SettingsScreen() {
       <View style={styles.action}>
         <Button title="Upload now" onPress={onUploadNow} />
       </View>
-
-      <List.Subheader>Servers</List.Subheader>
-      <Row label="Assistant" value={apiUrl} styles={styles} />
-      <Row label="Location" value={locationApiUrl} styles={styles} />
-      <Row label="Health" value={healthApiUrl} styles={styles} />
 
       <List.Subheader>Developer</List.Subheader>
       <List.Item

@@ -13,7 +13,7 @@ import type {
   TopicSummaryDto
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type listTopicsResponse200 = {
   data: TopicSummaryDto[]
@@ -56,15 +56,15 @@ export const getListTopicsUrl = (params?: ListTopicsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/topics?${stringifiedParams}` : `/api/comms/topics`
+  return stringifiedParams.length > 0 ? `/comms-api/topics?${stringifiedParams}` : `/comms-api/topics`
 }
 
 /**
  * @summary List topics by status (poll alternative to closed-topic push).
  */
-export const listTopics = async (params?: ListTopicsParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<listTopicsResponse> => {
+export const listTopics = async (params?: ListTopicsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listTopicsResponse> => {
 
-  return apiFetchAssistant<listTopicsResponse>(getListTopicsUrl(params),
+  return apiFetch<listTopicsResponse>(getListTopicsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -121,16 +121,16 @@ export const getGetTopicUrl = (id: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/topics/${id}?${stringifiedParams}` : `/api/comms/topics/${id}`
+  return stringifiedParams.length > 0 ? `/comms-api/topics/${id}?${stringifiedParams}` : `/comms-api/topics/${id}`
 }
 
 /**
  * @summary Get a topic with its ordered message window (open-topic tail).
  */
 export const getTopic = async (id: string,
-    params?: GetTopicParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<getTopicResponse> => {
+    params?: GetTopicParams, options?: Parameters<typeof apiFetch>[1]): Promise<getTopicResponse> => {
 
-  return apiFetchAssistant<getTopicResponse>(getGetTopicUrl(id,params),
+  return apiFetch<getTopicResponse>(getGetTopicUrl(id,params),
   {
     ...options,
     method: 'GET'

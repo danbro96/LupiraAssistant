@@ -1,0 +1,57 @@
+{
+  "operations": {
+    "assistant-api": [
+      "DELETE /push-tokens/{token}",
+      "GET /auth/status",
+      "GET /inbox",
+      "GET /me/preferences",
+      "GET /me/profile",
+      "POST /checkins/{id}/answer",
+      "POST /notices/{id}/read",
+      "POST /proposals/{id}/resolve",
+      "POST /push-tokens",
+      "PUT /me/preferences",
+      "PUT /me/profile/routing"
+    ],
+    "comms-api": [
+      "GET /conversations",
+      "GET /conversations/{id}/messages",
+      "GET /me/connectors",
+      "GET /search",
+      "GET /topics",
+      "GET /topics/{id}"
+    ],
+    "health-api": [
+      "GET /me",
+      "GET /records",
+      "POST /me/bootstrap",
+      "POST /records"
+    ],
+    "location-api": [
+      "DELETE /devices/{id}",
+      "GET /devices",
+      "GET /me",
+      "POST /devices",
+      "PUT /devices/{id}"
+    ]
+  },
+  "anonymous": {
+    "assistant-api": [
+      "GET /auth/callback",
+      "GET /auth/done",
+      "GET /auth/login",
+      "POST /auth/callback"
+    ]
+  },
+  "device": {
+    "health-api": [
+      "POST /ingest/ring",
+      "POST /ingest/summaries"
+    ],
+    "location-api": [
+      "GET /ingest/location/cursor",
+      "GET /ingest/location/state",
+      "POST /ingest/location"
+    ]
+  }
+}

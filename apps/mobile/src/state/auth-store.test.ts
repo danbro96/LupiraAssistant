@@ -32,25 +32,16 @@ beforeEach(() => {
 });
 
 describe('setBackend', () => {
-  it('applies every origin the preset carries, not just the primary', async () => {
+  it('applies the preset origin and mode', async () => {
     await useAuth.getState().setBackend(emulator.urls, 'dev');
     const s = useAuth.getState();
     expect(s.apiUrl).toBe(emulator.urls.api);
-    expect(s.locationApiUrl).toBe(emulator.urls.location);
-    expect(s.healthApiUrl).toBe(emulator.urls.health);
     expect(s.authMode).toBe('dev');
   });
 
   it('clears the session — a token minted for one backend is meaningless against another', async () => {
     await useAuth.getState().setBackend(emulator.urls, 'dev');
     expect(useAuth.getState().token).toBeNull();
-  });
-
-  it('keeps origins the preset omits', async () => {
-    const before = useAuth.getState().healthApiUrl;
-    await useAuth.getState().setBackend({ api: 'http://localhost:9999' }, 'dev');
-    expect(useAuth.getState().apiUrl).toBe('http://localhost:9999');
-    expect(useAuth.getState().healthApiUrl).toBe(before);
   });
 
   it('persists the mode so a relaunch does not fall back to OIDC against a dev backend', async () => {

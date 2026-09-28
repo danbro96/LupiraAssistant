@@ -1,10 +1,9 @@
 import Constants from 'expo-constants';
 
-/** Location ingest + device registration → LocationApi; health record/bootstrap → HealthApi;
- *  proposals/grant/archive → the assistant BFF (one origin, /api/{assistant,comms} prefixes baked
- *  into the generated clients). */
+/** Every call goes through the assistant BFF — one origin; the path prefix picks the upstream
+ *  (`/api` assistant, `/comms-api`, `/location-api`, `/health-api`, device ingest at `/ingest`). */
 
-/** 'dev' = this backend's bypass; all three accept an `X-Dev-User` header in Development. */
+/** 'dev' = the BFF's bypass; it and every upstream accept an `X-Dev-User` header in Development. */
 export type AuthMode = 'oidc' | 'dev';
 
 /** `urls.api` is the primary origin; multi-backend apps add keys. */
@@ -19,19 +18,19 @@ export const API_PRESETS: ApiPreset[] = [
   {
     key: 'prod',
     label: 'Production',
-    urls: { api: 'https://assistant.lupira.com', location: 'https://location-api.lupira.com', health: 'https://health-api.lupira.com' },
+    urls: { api: 'https://assistant.lupira.com' },
     authMode: 'oidc',
   },
   {
     key: 'lan',
     label: 'LAN dev',
-    urls: { api: 'http://192.168.14.108:5285', location: 'http://192.168.14.108:5270', health: 'http://192.168.14.108:5260' },
+    urls: { api: 'http://192.168.14.108:5183' },
     authMode: 'dev',
   },
   {
     key: 'emulator',
     label: 'Emulator dev',
-    urls: { api: 'http://10.0.2.2:5285', location: 'http://10.0.2.2:5270', health: 'http://10.0.2.2:5260' },
+    urls: { api: 'http://10.0.2.2:5183' },
     authMode: 'dev',
   },
 ];
@@ -41,9 +40,7 @@ export const DEV_USER = 'daniel.brostrom@hotmail.se';
 
 export const DEFAULT_AUTH_MODE: AuthMode = 'oidc';
 
-export const DEFAULT_ASSISTANT_API_URL = API_PRESETS[0].urls.api;
-export const DEFAULT_LOCATION_API_URL = API_PRESETS[0].urls.location;
-export const DEFAULT_HEALTH_API_URL = API_PRESETS[0].urls.health;
+export const DEFAULT_API_URL = API_PRESETS[0].urls.api;
 
 /** Extra screens the Developer screen links to. */
 export const DIAGNOSTIC_ROUTES: { route: string; label: string }[] = [

@@ -17,7 +17,7 @@ import type {
   SearchParams
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type searchResponse200 = {
   data: ArchiveSearchHitDto[]
@@ -65,15 +65,15 @@ export const getSearchUrl = (params?: SearchParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/search?${stringifiedParams}` : `/api/comms/search`
+  return stringifiedParams.length > 0 ? `/comms-api/search?${stringifiedParams}` : `/comms-api/search`
 }
 
 /**
  * @summary Hybrid research search over the corpus (semantic + full-text, reranked).
  */
-export const search = async (params?: SearchParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<searchResponse> => {
+export const search = async (params?: SearchParams, options?: Parameters<typeof apiFetch>[1]): Promise<searchResponse> => {
 
-  return apiFetchAssistant<searchResponse>(getSearchUrl(params),
+  return apiFetch<searchResponse>(getSearchUrl(params),
   {
     ...options,
     method: 'GET'
@@ -124,15 +124,15 @@ export const getListConnectorsUrl = (params?: ListConnectorsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/me/connectors?${stringifiedParams}` : `/api/comms/me/connectors`
+  return stringifiedParams.length > 0 ? `/comms-api/me/connectors?${stringifiedParams}` : `/comms-api/me/connectors`
 }
 
 /**
  * @summary Capture status per source: granted connectors, message count, last arrival.
  */
-export const listConnectors = async (params?: ListConnectorsParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<listConnectorsResponse> => {
+export const listConnectors = async (params?: ListConnectorsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listConnectorsResponse> => {
 
-  return apiFetchAssistant<listConnectorsResponse>(getListConnectorsUrl(params),
+  return apiFetch<listConnectorsResponse>(getListConnectorsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -183,15 +183,15 @@ export const getListConversationsUrl = (params?: ListConversationsParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/conversations?${stringifiedParams}` : `/api/comms/conversations`
+  return stringifiedParams.length > 0 ? `/comms-api/conversations?${stringifiedParams}` : `/comms-api/conversations`
 }
 
 /**
  * @summary List conversations, newest activity first (title filter, cursor-paged).
  */
-export const listConversations = async (params?: ListConversationsParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<listConversationsResponse> => {
+export const listConversations = async (params?: ListConversationsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listConversationsResponse> => {
 
-  return apiFetchAssistant<listConversationsResponse>(getListConversationsUrl(params),
+  return apiFetch<listConversationsResponse>(getListConversationsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -248,16 +248,16 @@ export const getListMessagesUrl = (id: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/comms/conversations/${id}/messages?${stringifiedParams}` : `/api/comms/conversations/${id}/messages`
+  return stringifiedParams.length > 0 ? `/comms-api/conversations/${id}/messages?${stringifiedParams}` : `/comms-api/conversations/${id}/messages`
 }
 
 /**
  * @summary A chat-style thread page: latest, before/after an anchor, or around one (search-hit jump).
  */
 export const listMessages = async (id: string,
-    params?: ListMessagesParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<listMessagesResponse> => {
+    params?: ListMessagesParams, options?: Parameters<typeof apiFetch>[1]): Promise<listMessagesResponse> => {
 
-  return apiFetchAssistant<listMessagesResponse>(getListMessagesUrl(id,params),
+  return apiFetch<listMessagesResponse>(getListMessagesUrl(id,params),
   {
     ...options,
     method: 'GET'

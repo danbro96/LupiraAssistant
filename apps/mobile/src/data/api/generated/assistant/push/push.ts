@@ -10,7 +10,7 @@ import type {
   RegisterPushTokenRequest
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type createPushTokenResponse204 = {
   data: void
@@ -46,13 +46,13 @@ export const getCreatePushTokenUrl = () => {
 
 
 
-  return `/api/assistant/push-tokens`
+  return `/api/push-tokens`
 }
 
 /**
  * @summary Register this device's Expo push token (idempotent on the token).
  */
-export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<createPushTokenResponse> => {
+export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: Parameters<typeof apiFetch>[1]): Promise<createPushTokenResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -68,7 +68,7 @@ export const createPushToken = async (registerPushTokenRequest: RegisterPushToke
     }
     return headers;
   };
-return apiFetchAssistant<createPushTokenResponse>(getCreatePushTokenUrl(),
+return apiFetch<createPushTokenResponse>(getCreatePushTokenUrl(),
   {
     ...options,
     method: 'POST',
@@ -112,15 +112,15 @@ export const getDeletePushTokenUrl = (token: string,) => {
 
 
 
-  return `/api/assistant/push-tokens/${token}`
+  return `/api/push-tokens/${token}`
 }
 
 /**
  * @summary Drop a push token (logout).
  */
-export const deletePushToken = async (token: string, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<deletePushTokenResponse> => {
+export const deletePushToken = async (token: string, options?: Parameters<typeof apiFetch>[1]): Promise<deletePushTokenResponse> => {
 
-  return apiFetchAssistant<deletePushTokenResponse>(getDeletePushTokenUrl(token),
+  return apiFetch<deletePushTokenResponse>(getDeletePushTokenUrl(token),
   {
     ...options,
     method: 'DELETE'

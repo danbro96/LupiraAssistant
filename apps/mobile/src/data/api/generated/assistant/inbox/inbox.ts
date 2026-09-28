@@ -15,7 +15,7 @@ import type {
   ResolveProposalRequest
 } from '../models';
 
-import { apiFetchAssistant } from '../../../mutators';
+import { apiFetch } from '../../../mutators';
 
 export type getInboxResponse200 = {
   data: InboxResponse
@@ -58,15 +58,15 @@ export const getGetInboxUrl = (params?: GetInboxParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/assistant/inbox?${stringifiedParams}` : `/api/assistant/inbox`
+  return stringifiedParams.length > 0 ? `/api/inbox?${stringifiedParams}` : `/api/inbox`
 }
 
 /**
  * @summary The caller's feed: pending approvals + open questions (default), or resolved history.
  */
-export const getInbox = async (params?: GetInboxParams, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<getInboxResponse> => {
+export const getInbox = async (params?: GetInboxParams, options?: Parameters<typeof apiFetch>[1]): Promise<getInboxResponse> => {
 
-  return apiFetchAssistant<getInboxResponse>(getGetInboxUrl(params),
+  return apiFetch<getInboxResponse>(getGetInboxUrl(params),
   {
     ...options,
     method: 'GET'
@@ -120,14 +120,14 @@ export const getResolveProposalUrl = (id: string,) => {
 
 
 
-  return `/api/assistant/proposals/${id}/resolve`
+  return `/api/proposals/${id}/resolve`
 }
 
 /**
  * @summary Approve, edit, or dismiss a pending proposal. Idempotent on clientActionId.
  */
 export const resolveProposal = async (id: string,
-    resolveProposalRequest: ResolveProposalRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<resolveProposalResponse> => {
+    resolveProposalRequest: ResolveProposalRequest, options?: Parameters<typeof apiFetch>[1]): Promise<resolveProposalResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -143,7 +143,7 @@ export const resolveProposal = async (id: string,
     }
     return headers;
   };
-return apiFetchAssistant<resolveProposalResponse>(getResolveProposalUrl(id),
+return apiFetch<resolveProposalResponse>(getResolveProposalUrl(id),
   {
     ...options,
     method: 'POST',
@@ -197,14 +197,14 @@ export const getAnswerCheckInUrl = (id: string,) => {
 
 
 
-  return `/api/assistant/checkins/${id}/answer`
+  return `/api/checkins/${id}/answer`
 }
 
 /**
  * @summary Answer or skip an open question. Idempotent on clientActionId.
  */
 export const answerCheckIn = async (id: string,
-    answerCheckInRequest: AnswerCheckInRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<answerCheckInResponse> => {
+    answerCheckInRequest: AnswerCheckInRequest, options?: Parameters<typeof apiFetch>[1]): Promise<answerCheckInResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -220,7 +220,7 @@ export const answerCheckIn = async (id: string,
     }
     return headers;
   };
-return apiFetchAssistant<answerCheckInResponse>(getAnswerCheckInUrl(id),
+return apiFetch<answerCheckInResponse>(getAnswerCheckInUrl(id),
   {
     ...options,
     method: 'POST',
@@ -274,14 +274,14 @@ export const getMarkNoticeReadUrl = (id: string,) => {
 
 
 
-  return `/api/assistant/notices/${id}/read`
+  return `/api/notices/${id}/read`
 }
 
 /**
  * @summary Mark a notice read. Idempotent on clientActionId.
  */
 export const markNoticeRead = async (id: string,
-    readNoticeRequest: ReadNoticeRequest, options?: Parameters<typeof apiFetchAssistant>[1]): Promise<markNoticeReadResponse> => {
+    readNoticeRequest: ReadNoticeRequest, options?: Parameters<typeof apiFetch>[1]): Promise<markNoticeReadResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -297,7 +297,7 @@ export const markNoticeRead = async (id: string,
     }
     return headers;
   };
-return apiFetchAssistant<markNoticeReadResponse>(getMarkNoticeReadUrl(id),
+return apiFetch<markNoticeReadResponse>(getMarkNoticeReadUrl(id),
   {
     ...options,
     method: 'POST',
