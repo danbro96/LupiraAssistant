@@ -10,6 +10,8 @@ services:
       Auth__Bearer__Audience: ${AUTH_AUDIENCE:-lupira-assistant}
       ReverseProxy__Clusters__assistant-api__Destinations__primary__Address: ${ASSISTANT_API_BASE_URL:?required}
       ReverseProxy__Clusters__comms-api__Destinations__primary__Address: ${COMMS_API_BASE_URL:?required}
+      ReverseProxy__Clusters__location-api__Destinations__primary__Address: ${LOCATION_API_BASE_URL:?required}
+      ReverseProxy__Clusters__health-api__Destinations__primary__Address: ${HEALTH_API_BASE_URL:?required}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
       OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
       OTEL_METRIC_EXPORT_INTERVAL: ${OTEL_METRIC_EXPORT_INTERVAL:-300000}
