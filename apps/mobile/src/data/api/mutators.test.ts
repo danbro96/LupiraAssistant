@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setDeviceKeyPort } from './auth-ports';
 import { ingestLocation } from './generated/location-ingest/ingest/ingest';
 
+vi.mock('expo-constants', () => ({ default: { expoConfig: { version: '0.0.0' } } }));
+
 // The NDJSON path is the one Orval can't express: it JSON-encodes every request body, so the mutator
 // has to undo that for x-ndjson or the server receives one quoted, escaped line.
 

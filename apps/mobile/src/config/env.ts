@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+
 /** Location ingest + device registration → LocationApi; health record/bootstrap → HealthApi;
  *  proposals/grant/archive → the assistant BFF (one origin, /api/{assistant,comms} prefixes baked
  *  into the generated clients). */
@@ -48,8 +50,7 @@ export const DIAGNOSTIC_ROUTES: { route: string; label: string }[] = [
   { route: 'DebugLog', label: 'Debug log' },
 ];
 
-/** Keep in sync with app.config.ts. */
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 /** Public client key, safe to commit. Empty disables crash reporting. */
 export const SENTRY_DSN = '';
