@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace LupiraAssistantWeb.IntegrationTests;
+namespace LupiraAssistantBff.IntegrationTests;
 
 /// <summary>
 /// In-process upstream the YARP clusters point at during tests: a real Kestrel listener on an ephemeral port

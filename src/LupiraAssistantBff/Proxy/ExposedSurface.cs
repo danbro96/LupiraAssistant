@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace LupiraAssistantWeb.Proxy;
+namespace LupiraAssistantBff.Proxy;
 
 /// <summary>
 /// Every <c>VERB /path</c> the BFF forwards. A positive list, so an endpoint an upstream grows later
@@ -37,5 +37,5 @@ internal sealed class ExposedSurface
             ?? throw new InvalidOperationException($"{ResourceName} did not deserialize.");
     }
 
-    private const string ResourceName = "LupiraAssistantWeb.exposed.json";
+    private const string ResourceName = "LupiraAssistantBff.exposed.json";
 }

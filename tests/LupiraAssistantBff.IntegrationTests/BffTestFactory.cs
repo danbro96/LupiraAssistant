@@ -9,7 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using Xunit;
 
-namespace LupiraAssistantWeb.IntegrationTests;
+namespace LupiraAssistantBff.IntegrationTests;
 
 /// <summary>
 /// Hosts the BFF in the Production wiring (bearer-only, the shipped policy) with the YARP clusters pointed

@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Xunit;
 
-namespace LupiraAssistantWeb.IntegrationTests;
+namespace LupiraAssistantBff.IntegrationTests;
 
 public sealed class ProxyBehaviorTests(BffTestFactory factory) : IClassFixture<BffTestFactory>
 {

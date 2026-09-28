@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-namespace LupiraAssistantWeb.Auth;
+namespace LupiraAssistantBff.Auth;
 
 /// <summary>
 /// Non-production auth: authenticates every request as the configured local user (<c>Dev:User</c>) so

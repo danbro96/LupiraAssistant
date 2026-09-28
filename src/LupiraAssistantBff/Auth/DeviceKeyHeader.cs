@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace LupiraAssistantWeb.Auth;
+namespace LupiraAssistantBff.Auth;
 
 /// <summary>
 /// The device-ingest credential. Only location-api holds the device keys, so the BFF cannot verify one —

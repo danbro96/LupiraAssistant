@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 env:
-  SOLUTION: LupiraAssistantWeb.slnx
+  SOLUTION: LupiraAssistantBff.slnx
 
 jobs:
   unit:
@@ -16,7 +16,7 @@ jobs:
           dotnet-version: '10.0.x'
       - run: dotnet test ${{ env.SOLUTION }} -c Release
       # Hermetic (in-process stub upstream, no Docker) — cheap enough to run always.
-      - run: dotnet test tests/LupiraAssistantWeb.IntegrationTests -c Release
+      - run: dotnet test tests/LupiraAssistantBff.IntegrationTests -c Release
 
   frontend:
     runs-on: ubuntu-latest

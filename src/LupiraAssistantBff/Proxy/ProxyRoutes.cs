@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace LupiraAssistantWeb.Proxy;
+namespace LupiraAssistantBff.Proxy;
 
 /// <summary>
 /// Builds <c>ReverseProxy:Routes</c> from <c>exposed.json</c> — one exact template per path, methods

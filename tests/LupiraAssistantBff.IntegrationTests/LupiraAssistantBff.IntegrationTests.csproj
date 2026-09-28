@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
-    <!-- Not in the .slnx (unit-only there): run by path — `dotnet test tests/LupiraAssistantWeb.IntegrationTests`. -->
+    <!-- Not in the .slnx (unit-only there): run by path — `dotnet test tests/LupiraAssistantBff.IntegrationTests`. -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\LupiraAssistantWeb\LupiraAssistantWeb.csproj" />
+    <ProjectReference Include="..\..\src\LupiraAssistantBff\LupiraAssistantBff.csproj" />
   </ItemGroup>
 
 </Project>

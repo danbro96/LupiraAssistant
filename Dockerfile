@@ -3,11 +3,11 @@
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
-COPY src/LupiraAssistantWeb/ ./LupiraAssistantWeb/
-WORKDIR /src/LupiraAssistantWeb
+COPY src/LupiraAssistantBff/ ./LupiraAssistantBff/
+WORKDIR /src/LupiraAssistantBff
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet restore "./LupiraAssistantWeb.csproj"
-RUN dotnet publish "./LupiraAssistantWeb.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet restore "./LupiraAssistantBff.csproj"
+RUN dotnet publish "./LupiraAssistantBff.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
@@ -22,4 +22,4 @@ USER app
 EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:80/livez || exit 1
-ENTRYPOINT ["dotnet", "LupiraAssistantWeb.dll"]
+ENTRYPOINT ["dotnet", "LupiraAssistantBff.dll"]

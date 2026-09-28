@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 
-namespace LupiraAssistantWeb.Auth;
+namespace LupiraAssistantBff.Auth;
 
 /// <summary>
 /// SSO gate for the proxied member surface. The mobile app presents an Authentik-minted JWT bearer that

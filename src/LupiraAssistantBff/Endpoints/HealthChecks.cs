@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace LupiraAssistantWeb.Endpoints;
+namespace LupiraAssistantBff.Endpoints;
 
 /// <summary>Liveness (<c>/livez</c>) and readiness (<c>/readyz</c>) probes — process-up only; the BFF's
 /// dependencies (assistant-api, comms-api) are reachable per-request through the proxy, not polled here.</summary>

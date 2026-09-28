@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="exposed.json" />
+    <InternalsVisibleTo Include="LupiraAssistantBff.UnitTests" />
   </ItemGroup>
 
   <ItemGroup>

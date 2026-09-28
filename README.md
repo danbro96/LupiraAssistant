@@ -4,13 +4,13 @@ The user-facing surface of the Lupira Assistant — a proactive, consent-first p
 running entirely on self-hosted infrastructure. Product intent: [docs/product-brief.md](docs/product-brief.md);
 architecture: [docs/app-backbone.md](docs/app-backbone.md); status: [docs/roadmap.md](docs/roadmap.md).
 
-## Layout (npm workspaces monorepo, mirrors LupiraCalWeb)
+## Layout (npm workspaces monorepo, mirrors LupiraCal)
 
 | Path | What |
 |---|---|
 | `apps/mobile` | The Expo/React Native app — the canonical surface (inbox, archive, settings). See its [README](apps/mobile/README.md). |
 | `packages/domain` | `@lupira/assistant-domain` — shared pure TS (consumed as source, vitest-tested, purity enforced by its own eslint config). |
-| `src/LupiraAssistantWeb` | .NET 10 BFF: the app's single public backend — Authentik bearer + YARP over an `exposed.json` allowlist to assistant-api (`/api`), comms-api (`/comms-api`), location-api (`/location-api`), health-api (`/health-api`) and device ingest (`/ingest/*`). Integration tests: `dotnet test tests/LupiraAssistantWeb.IntegrationTests`. |
+| `src/LupiraAssistantBff` | .NET 10 BFF: the app's single public backend — Authentik bearer + YARP over an `exposed.json` allowlist to assistant-api (`/api`), comms-api (`/comms-api`), location-api (`/location-api`), health-api (`/health-api`) and device ingest (`/ingest/*`). Integration tests: `dotnet test tests/LupiraAssistantBff.IntegrationTests`. |
 | `docs/` | Product brief, app backbone, cross-repo roadmap. |
 
 ## Scripts

@@ -1,6 +1,6 @@
-using LupiraAssistantWeb.Auth;
-using LupiraAssistantWeb.Endpoints;
-using LupiraAssistantWeb.Proxy;
+using LupiraAssistantBff.Auth;
+using LupiraAssistantBff.Endpoints;
+using LupiraAssistantBff.Proxy;
 using Microsoft.AspNetCore.HttpOverrides;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;

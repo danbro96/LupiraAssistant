@@ -12,19 +12,19 @@ Two halves:
 - **The canonical surface** — an interactive Inbox (Approve/Edit/Dismiss, answer questions, notices), the comms archive browser, native push, and in-app connector status & preferences. The hub's Telegram bot stays an optional secondary confirm channel.
 
 ## Repo shape — a monorepo, one public backend
-The client side is an npm-workspaces monorepo (the LupiraCalWeb pattern), so the mobile app and a future web SPA share pure logic instead of copying it:
+The client side is an npm-workspaces monorepo (the LupiraCal pattern), so the mobile app and a future web SPA share pure logic instead of copying it:
 
 | Path | What |
 |---|---|
 | `apps/mobile` | The Expo app — the canonical surface. |
 | `packages/domain` | `@lupira/assistant-domain`: shared pure TS (inbox mapping, ack classification, edit specs, thread paging), consumed as source, vitest-tested, kept dependency-free by its own eslint config. |
-| `src/LupiraAssistantWeb` | The **BFF**: .NET 10, Authentik bearer + YARP. The future SPA lands beside it. |
+| `src/LupiraAssistantBff` | The **BFF**: .NET 10, Authentik bearer + YARP. The future SPA lands beside it. |
 
 **One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`, `/location-api`, `/health-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. Device ingest (`/ingest/*`) is routed at the upstream's own path, unauthenticated at the BFF because only the upstream holds the device keys; the BFF rejects a malformed `DeviceKey` header and passes a well-formed one through untouched. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
 
 ```mermaid
 flowchart LR
-  APP[apps/mobile] -->|bearer| BFF[assistant.lupira.com<br/>LupiraAssistantWeb]
+  APP[apps/mobile] -->|bearer| BFF[assistant.lupira.com<br/>LupiraAssistantBff]
   APP -->|DeviceKey /ingest| BFF
   BFF -->|/api| HUB[assistant-api · LAN]
   BFF -->|/comms-api| COMMS[comms-api · LAN]
@@ -133,11 +133,11 @@ Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqu
 ## Deferred sections (named, to expand)
 - **Digest batching** — digest mode currently suppresses per-item pushes; the periodic digest that collects them into one notice is the remaining half (a scheduled hub prompt, not app work).
 - **Geofence registration** — the hub supplies geofences; the `collector` layer registers them via `Location.startGeofencingAsync`, turning arrival/departure into location-triggered nudges (leave-by, trip prompts). This reuses the existing background-location foundation.
-- **Web SPA** — `src/LupiraAssistantWeb.Client` beside the BFF, reusing `packages/domain`; the BFF already carries the cookie/interactive half of the auth story for it.
+- **Web SPA** — `apps/web` beside the mobile app, reusing `packages/domain`; the BFF already carries the cookie/interactive half of the auth story for it.
 - **Self-hosted map view** — render the user's own location history (the brief's deferred "Map view"); the heaviest future item, a tiles surface rather than a connector.
 
 ## Decisions
-1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantWeb`, CalWeb's shape: an `exposed.json` allowlist, `/api` + `/<name>-api` prefixes, device ingest at the upstream's path, the bearer forwarded verbatim (upstreams re-validate). No upstream sits on the public edge, and the future SPA gets a same-origin home.
+1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantBff`, CalWeb's shape: an `exposed.json` allowlist, `/api` + `/<name>-api` prefixes, device ingest at the upstream's path, the bearer forwarded verbatim (upstreams re-validate). No upstream sits on the public edge, and the future SPA gets a same-origin home.
 2. ✅ **Monorepo** — mobile + BFF + shared domain in one repo (the cal-web pattern), so pure logic is shared as source instead of copied.
 3. ✅ **Enrollment return leg via `return_uri`** — the hub takes an allow-listed `return_uri` and `/auth/done` 302s to the app's deep link; the allowlist is what keeps it from being an open redirect.
 4. ✅ **One merged `/inbox` feed** with a kind discriminator (proposal · question · notice), not per-kind endpoints — the app renders one chronological queue, so one fetch matches the surface.

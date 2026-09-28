@@ -1,9 +1,9 @@
-# LupiraAssistantMobile — agent notes
+# LupiraAssistant — agent notes
 
-- **Monorepo** (npm workspaces, mirrors LupiraCalWeb) despite the repo name: `apps/mobile` (the
+- **Monorepo** (npm workspaces, mirrors LupiraCal): `apps/mobile` (the
   canonical surface), `packages/domain` (`@lupira/assistant-domain`), `packages/tokens`
-  (`@lupira/assistant-tokens`), `src/LupiraAssistantWeb` (.NET 10 BFF fronting assistant-api and
-  comms-api). **No web SPA exists yet** — it is deferred in `docs/roadmap.md`; the tokens package is
+  (`@lupira/assistant-tokens`), `src/LupiraAssistantBff` (.NET 10 BFF fronting assistant-api,
+  comms-api, location-api and health-api). **No web SPA exists yet** — it is deferred in `docs/roadmap.md`; the tokens package is
   already shaped for it. Pre-release: v0.1.0, no tags, no EAS builds, BFF not deployed.
 - **Two products in one app**: the assistant surface (inbox of proposals, comms archive browser,
   settings) and the household telemetry collector (background GPS → NDJSON store-and-forward).
@@ -20,7 +20,7 @@
 - **API clients are generated**: orval → `src/data/api/generated/` (never hand-edit). `client: 'fetch'`,
   not react-query — assistant reads come from the BFF and the inbox cache.
 - **One origin — the BFF** (CalWeb's shape): every call, device ingest included, goes through
-  `src/LupiraAssistantWeb`; only `exposed.json` entries are routed. A new upstream endpoint the app
+  `src/LupiraAssistantBff`; only `exposed.json` entries are routed. A new upstream endpoint the app
   calls needs a line there. `API_PRESETS` in `config/env.ts` holds that one origin per preset;
   Settings → Developer switches at runtime. `authMode: 'dev'` swaps the bearer for `X-Dev-User`,
   which the BFF and every upstream accept only in Development. The emulator

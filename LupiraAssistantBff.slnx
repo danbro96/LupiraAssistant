@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+    <File Path="Dockerfile" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/LupiraAssistantBff/LupiraAssistantBff.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LupiraAssistantBff.UnitTests/LupiraAssistantBff.UnitTests.csproj" />
+  </Folder>
+</Solution>
