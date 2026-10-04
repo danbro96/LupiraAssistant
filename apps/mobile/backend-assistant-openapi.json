@@ -1346,8 +1346,7 @@
         "enum": [
           "CalWorker",
           "Comms",
-          "CheckIn",
-          null
+          "CheckIn"
         ]
       },
       "InboundTopicRequest": {
@@ -1579,13 +1578,11 @@
         },
         "description": "An LLM-interpreted, contracted payload → an agent run. Declared at authoring; enforced here at fire."
       },
-      "JsonElement": {},
       "ModelTier": {
         "enum": [
           "Small",
           "Medium",
-          "Large",
-          null
+          "Large"
         ]
       },
       "OutputKind": {
@@ -1791,7 +1788,7 @@
             "type": "string"
           },
           "routing": {
-            "$ref": "#/components/schemas/RoutingResponse"
+            "$ref": "#/components/schemas/RoutingDto"
           },
           "updatedAt": {
             "type": [
@@ -1942,6 +1939,52 @@
         },
         "description": "The proposal behind an approval card: what will be written on approve. Exactly one of the typed\npayloads is set, matching ProposedActionKind ProposalDetailDto.ActionKind (event/contact/task/place families)."
       },
+      "ProposalEdits": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EventProposal"
+              }
+            ]
+          },
+          "contact": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ContactProposal"
+              }
+            ]
+          },
+          "task": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TaskProposal"
+              }
+            ]
+          },
+          "place": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlaceProposal"
+              }
+            ]
+          }
+        },
+        "description": "A user's edit of a proposal: exactly one slot is set, matching the proposal's kind."
+      },
       "ProposedActionKind": {
         "enum": [
           "CreateEvent",
@@ -2080,8 +2123,8 @@
                 "type": "null"
               },
               {
-                "description": "For ResolutionAction.Edit: the full edited payload (same shape the\n            proposal's typed slot carries). Ignored for approve/dismiss.",
-                "$ref": "#/components/schemas/JsonElement"
+                "description": "For ResolutionAction.Edit: the full edited payload in the slot matching the\n            proposal's kind. Ignored for approve/dismiss.",
+                "$ref": "#/components/schemas/ProposalEdits"
               }
             ]
           },
@@ -2093,7 +2136,7 @@
         },
         "description": "Resolve a pending proposal. Replay-safe: the hub dedups on Guid ResolveProposalRequest.ClientActionId."
       },
-      "RoutingResponse": {
+      "RoutingDto": {
         "required": [
           "personalCalendarId",
           "groupCalendarId",

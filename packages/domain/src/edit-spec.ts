@@ -58,8 +58,10 @@ const PLACE: FieldSpec[] = [
   { path: ['formattedAddress'], label: 'Address', type: 'multiline' },
 ];
 
-/** The payload slot an action kind edits ('event' | 'contact' | 'task' | 'place'), null if not editable. */
-export function payloadSlotFor(actionKind: string): 'event' | 'contact' | 'task' | 'place' | null {
+export type EditSlot = 'event' | 'contact' | 'task' | 'place';
+
+/** The payload slot an action kind edits, null if not editable. */
+export function payloadSlotFor(actionKind: string): EditSlot | null {
   switch (actionKind) {
     case 'CreateEvent':
     case 'UpdateEvent':

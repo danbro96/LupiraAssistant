@@ -1,14 +1,16 @@
 // The acks stream: inbox gestures (resolve a proposal / answer a question) queued offline and
 // replayed against the hub, which dedups on clientActionId. Pure types + result classification.
 
+import type { EditSlot } from './edit-spec';
+
 export type AckKind = 'resolve' | 'answer' | 'read';
 
 export type ResolveAction = 'Approve' | 'Edit' | 'Dismiss';
 
 export interface ResolvePayload {
   action: ResolveAction;
-  /** Full edited proposal payload; required when action is Edit. */
-  edits?: unknown;
+  /** Full edited proposal payload in the slot matching the proposal's kind; required when action is Edit. */
+  edits?: Partial<Record<EditSlot, Record<string, unknown>>>;
 }
 
 export interface AnswerPayload {

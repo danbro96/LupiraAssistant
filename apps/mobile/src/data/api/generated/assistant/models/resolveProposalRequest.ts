@@ -5,7 +5,7 @@
  * The assistant hub/brain for Lupira: fire intake, agent runs, consent, and on-behalf-of writes. Authenticate with a Bearer token issued by Authentik.
  * OpenAPI spec version: v1
  */
-import type { JsonElement } from './jsonElement';
+import type { ProposalEdits } from './proposalEdits';
 import type { ResolutionAction } from './resolutionAction';
 
 /**
@@ -13,7 +13,7 @@ import type { ResolutionAction } from './resolutionAction';
  */
 export interface ResolveProposalRequest {
   action: ResolutionAction;
-  edits?: null | JsonElement;
+  edits?: null | ProposalEdits;
   /** Client-generated idempotency key (one per user gesture, stable across retries). */
   clientActionId: string;
 }

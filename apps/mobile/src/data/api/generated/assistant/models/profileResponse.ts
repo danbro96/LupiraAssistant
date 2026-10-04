@@ -5,11 +5,11 @@
  * The assistant hub/brain for Lupira: fire intake, agent runs, consent, and on-behalf-of writes. Authenticate with a Bearer token issued by Authentik.
  * OpenAPI spec version: v1
  */
-import type { RoutingResponse } from './routingResponse';
+import type { RoutingDto } from './routingDto';
 
 export interface ProfileResponse {
   principalId: string;
-  routing: RoutingResponse;
+  routing: RoutingDto;
   /** @nullable */
   updatedAt?: string | null;
 }

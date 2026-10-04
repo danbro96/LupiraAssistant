@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyAckStatus, parseAckPayload } from './ack';
+import { classifyAckStatus, parseAckPayload, type ResolvePayload } from './ack';
 
 describe('classifyAckStatus', () => {
   it('accepts 2xx', () => {
@@ -23,6 +23,11 @@ describe('classifyAckStatus', () => {
 describe('parseAckPayload', () => {
   it('round-trips a resolve payload', () => {
     expect(parseAckPayload('resolve', '{"action":"Approve"}')).toEqual({ action: 'Approve' });
+  });
+
+  it('round-trips a resolve edit in its slot', () => {
+    const payload: ResolvePayload = { action: 'Edit', edits: { event: { title: 'Dinner at 8' } } };
+    expect(parseAckPayload('resolve', JSON.stringify(payload))).toEqual(payload);
   });
 
   it('rejects an unknown resolve action', () => {

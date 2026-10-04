@@ -9,7 +9,7 @@
 /**
  * The principal's resolved routing defaults (null = not yet learned/set).
  */
-export interface RoutingResponse {
+export interface RoutingDto {
   /** @nullable */
   personalCalendarId: string | null;
   /** @nullable */

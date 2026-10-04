@@ -72,7 +72,7 @@ export function EditProposalScreen() {
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
-    void useInbox.getState().resolve(item!.id, { action: 'Edit', edits: next });
+    void useInbox.getState().resolve(item!.id, { action: 'Edit', edits: { [slot!]: next } });
     toast('Edit queued.');
     navigation.goBack();
   }
