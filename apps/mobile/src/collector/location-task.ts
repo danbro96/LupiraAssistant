@@ -20,7 +20,7 @@ import {
   activityOf,
 } from '../domain/motion-state';
 import { speedFromDisplacement } from '../domain/geo';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Defined at module top level: OS runs this in a bare JS context (no React tree), registered during cold start.
 

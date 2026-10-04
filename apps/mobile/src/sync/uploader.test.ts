@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Db } from '../data/db/db';
 
 vi.mock('expo-constants', () => ({ default: { expoConfig: { version: '0.0.0' } } }));
-vi.mock('../debug/log', () => ({ logDebug: vi.fn() }));
+vi.mock('@danbro96/lupira-expo-diagnostics/log', () => ({ logDebug: vi.fn() }));
 
 const fixesRepo = {
   selectPending: vi.fn(),

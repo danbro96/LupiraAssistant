@@ -1,3 +1,5 @@
+import type { IconName } from '@danbro96/lupira-tokens-core/icons';
+
 /**
  * The estate's icon vocabulary, resolved to `MaterialIcons` (Google Material — the same family the
  * SPAs render through `@mui/icons-material`). Paper's `icon` prop defaults to MaterialCommunityIcons,
@@ -56,6 +58,6 @@ export const ICONS = {
   tools: 'construction',
   tune: 'tune',
   walk: 'directions-walk',
-} as const;
+} as const satisfies Record<IconName, string>;
 
 export type IconKey = keyof typeof ICONS;

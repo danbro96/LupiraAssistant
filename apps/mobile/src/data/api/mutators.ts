@@ -1,8 +1,9 @@
 import { oidcAuthPort, deviceKeyPort } from './auth-ports';
 import { coreFetch, joinUrl } from './http';
-import { ApiError, DeviceKeyInvalidError } from '../../domain/api-error';
+import { ApiError } from '@danbro96/lupira-http/apiError';
+import { DeviceKeyInvalidError } from '../../domain/api-error';
 import { buildDeviceKeyHeader } from '../../domain/device-key-auth';
-import { isRetriableRequest } from '../../domain/retry-policy';
+import { isRetriableRequest } from '@danbro96/lupira-http/retryPolicy';
 import { DEV_USER } from '../../config/env';
 
 // One mutator per auth scheme — every target shares the BFF origin, and the path carries its prefix.

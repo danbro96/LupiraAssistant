@@ -11,13 +11,14 @@ import {
   OIDC_SCHEME,
   OIDC_SCOPES,
 } from '../../data/auth/oidc-config';
-import { decodeJwt, exchangeAuthCode } from '../../data/auth/oidc';
+import { decodeJwt } from '@danbro96/lupira-expo-oidc/oidc';
+import { oidc } from '../../data/auth/oidc';
 import { useAuth } from '../../state/auth-store';
 import { useDevice } from '../../state/device-store';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { spacing, useColors, type Palette } from '../theme';
-import { logDebug } from '../../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Dismisses the in-app browser when the auth redirect returns.
 WebBrowser.maybeCompleteAuthSession();
@@ -38,7 +39,7 @@ async function exchangeCodeForSession(
       setError('Discovery returned no token endpoint.');
       return;
     }
-    const token = await exchangeAuthCode({
+    const token = await oidc.exchangeAuthCode({
       tokenEndpoint,
       code,
       redirectUri,

@@ -9,5 +9,12 @@
   "scripts": {
     "typecheck": "tsc -b",
     "lint": "eslint ."
+  },
+  "dependencies": {
+    "@danbro96/lupira-tokens-core": "0.2.0"
+  },
+  "devDependencies": {
+    "@danbro96/lupira-config-eslint": "0.1.0",
+    "@danbro96/lupira-config-ts": "0.1.0"
   }
 }

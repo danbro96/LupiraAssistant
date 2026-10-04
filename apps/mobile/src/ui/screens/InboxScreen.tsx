@@ -8,10 +8,10 @@ import { launchConnect } from '../../data/auth/connect';
 import type { InboxItemView } from '@lupira/assistant-domain/inbox-item';
 import { payloadSlotFor } from '@lupira/assistant-domain/edit-spec';
 import type { RootStackParamList } from '../navigation/types';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
-import { toast } from '../../feedback/toast';
+import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 const GRANT_TEXT: Record<GrantStatus, string> = {
   connected: 'Assistant connected.',

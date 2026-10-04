@@ -8,7 +8,7 @@ import { selectBatch, type BatchItem } from '../domain/batcher';
 import { utf8ByteLength } from '../domain/ndjson';
 import { DeviceKeyInvalidError } from '../domain/api-error';
 import { MAX_BATCH_LINES, MAX_BATCH_BYTES, UPLOAD_FETCH_LIMIT } from '../config/env';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Server is idempotent, so a failed POST is retried next cycle (no data loss).
 

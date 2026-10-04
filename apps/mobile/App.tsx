@@ -7,12 +7,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { PaperProvider } from 'react-native-paper';
 import { RootStack } from './src/ui/navigation/RootStack';
-import { useAutoUpdate } from './src/ui/hooks/useAutoUpdate';
+import { useAutoUpdate } from '@danbro96/lupira-expo-diagnostics/useAutoUpdate';
 import { navigationRef } from './src/ui/navigation/notification-routing';
 import { startNotificationHandling, handleLaunchNotice } from './src/ui/notifications';
 import { registerPushToken } from './src/data/push/push-registration';
-import { ToastHost } from './src/ui/components/ToastHost';
-import { ConfirmDialogHost } from './src/ui/components/ConfirmDialog';
+import { ToastHost } from '@danbro96/lupira-expo-paper/components/ToastHost';
+import { ConfirmDialogHost } from '@danbro96/lupira-expo-paper/components/ConfirmDialog';
 import { useAuth } from './src/state/auth-store';
 import { useDevice } from './src/state/device-store';
 import { useInbox } from './src/state/inbox-store';
@@ -21,9 +21,9 @@ import { usePrefs } from './src/state/prefs-store';
 import { startSyncTriggers, kickSync } from './src/sync/sync-engine';
 import { registerUploadTask } from './src/sync/background-upload-task';
 import { SENTRY_DSN } from './src/config/env';
-import { UPDATE_CHANNEL, UPDATE_ID } from './src/ui/buildInfo';
+import { UPDATE_CHANNEL, UPDATE_ID } from '@danbro96/lupira-expo-diagnostics/buildInfo';
 import { lightColors, darkColors, navDark, navLight, paperDark, paperLight, type Palette } from './src/ui/theme';
-import { paperSettings } from './src/ui/theme/paperSettings';
+import { paperSettings } from '@danbro96/lupira-expo-paper/theme/paperSettings';
 
 // SENTRY_DSN is a public client key; Sentry no-ops when empty.
 Sentry.init({

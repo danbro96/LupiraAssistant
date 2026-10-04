@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
-import { API_PRESETS, DEFAULT_API_URL, DEFAULT_AUTH_MODE, type AuthMode } from '../config/env';
+import { DEFAULT_API_URL, DEFAULT_AUTH_MODE, type AuthMode } from '../config/env';
 import { SECURE_KEYS } from '../config/secure-keys';
 import { setOidcAuthPort, setDeviceKeyPort } from '../data/api/auth-ports';
-import { refreshTokens, RefreshError } from '../data/auth/oidc';
+import { RefreshError } from '@danbro96/lupira-expo-oidc/oidc';
+import { oidc } from '../data/auth/oidc';
 import { dropPushRegistration } from '../data/push/push-session';
 import { getApiKey } from '../data/secure/device-credentials';
-import { logDebug } from '../debug/log';
-import { toast } from '../feedback/toast';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
+import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 // OIDC session — every BFF call except device ingest, which uses the device key.
 
@@ -142,7 +143,7 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => ({
     if (refreshing) return refreshing;
     refreshing = (async (): Promise<string | null> => {
       try {
-        const t = await refreshTokens(refreshToken);
+        const t = await oidc.refreshTokens(refreshToken);
         if (!t.accessToken) return token;
         const next: Session = {
           accessToken: t.accessToken,
@@ -183,8 +184,3 @@ setDeviceKeyPort({
   getApiUrl: apiUrl,
   getApiKey: () => getApiKey(),
 });
-
-/** Which preset the current backend matches, or 'custom'. */
-export function presetFor(url: string, authMode: AuthMode): string {
-  return API_PRESETS.find((p) => p.urls.api === url && p.authMode === authMode)?.key ?? 'custom';
-}

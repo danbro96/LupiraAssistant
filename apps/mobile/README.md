@@ -15,8 +15,8 @@ Architecture and conventions mirror the sibling app **LupiraTasksMobile** (Expo 
 `domain → data → sync → state → ui` enforced by `eslint-plugin-boundaries`, Zustand, `expo-sqlite`,
 `expo-secure-store`, OIDC via `expo-auth-session`).
 
-UI stack: **react-native-paper 5 (MD3)**, themed in `src/ui/theme/paperTheme.ts` from
-`@lupira/assistant-tokens`. See the repo root's `CLAUDE.md` for the conventions that keep the three
+UI stack: **react-native-paper 5 (MD3)** via `@danbro96/lupira-expo-paper`, themed in
+`src/ui/theme/paperTheme.ts` from `@lupira/assistant-tokens` (which extends `@danbro96/lupira-tokens-core`). See the repo root's `CLAUDE.md` for the conventions that keep the three
 Lupira frontends coherent.
 
 ---
@@ -108,7 +108,8 @@ src/
                inbox (feed + grant), archive (conversations/threads/search), settings
   ui/          screens (inbox, edit-proposal, conversations, thread, archive search, connectors,
                preferences, settings, register), navigation, theme, shared components
-  config/ debug/ feedback/   cross-cutting leaves (env + secure keys, redacting logger, toast/haptics)
+  config/      cross-cutting leaf (env + secure keys); logger, toast/haptics, Paper kit and OIDC come
+               from the @danbro96/lupira-* packages
 ```
 
 Assistant gestures (approve / edit / dismiss / answer) apply optimistically, persist to the inbox

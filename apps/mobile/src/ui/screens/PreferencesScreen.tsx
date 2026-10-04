@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Switch, Text } from 'react-native-paper';
 import { useSettings } from '../../state/settings-store';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
-import { toast } from '../../feedback/toast';
+import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 // Delivery preferences: how the assistant may interrupt. Quiet hours hold back the push only — items
 // still land in the inbox, so nothing is lost while you sleep.

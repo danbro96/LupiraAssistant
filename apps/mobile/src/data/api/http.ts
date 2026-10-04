@@ -1,5 +1,6 @@
-import { ApiError, REQUEST_TIMEOUT_MS } from '../../domain/api-error';
-import { MAX_RETRIES, isTransientStatus, retryDelayMs } from '../../domain/retry-policy';
+import { ApiError } from '@danbro96/lupira-http/apiError';
+import { REQUEST_TIMEOUT_MS } from '../../domain/api-error';
+import { MAX_RETRIES, isTransientStatus, retryDelayMs } from '@danbro96/lupira-http/retryPolicy';
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Db } from '../data/db/db';
 
-vi.mock('../debug/log', () => ({ logDebug: vi.fn() }));
+vi.mock('@danbro96/lupira-expo-diagnostics/log', () => ({ logDebug: vi.fn() }));
 
 const fixesRepo = { deleteUpTo: vi.fn() };
 const seqRepo = { ensureAtLeast: vi.fn() };

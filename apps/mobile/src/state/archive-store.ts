@@ -13,7 +13,7 @@ import type {
   MessageSource,
 } from '../data/api/generated/comms/models';
 import { mergeThreadPage, pageMayHaveMore, threadWindowEnds } from '@lupira/assistant-domain/thread-page';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // The generated response types union success with ProblemDetails; a non-2xx already threw by the time
 // these resolve (see http.ts), so the success arm is the only reachable shape — narrow it here.

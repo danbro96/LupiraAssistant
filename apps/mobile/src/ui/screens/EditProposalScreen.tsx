@@ -13,10 +13,10 @@ import {
   visibleFields,
   type FieldSpec,
 } from '@lupira/assistant-domain/edit-spec';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { spacing, useColors, type Palette } from '../theme';
-import { toast } from '../../feedback/toast';
+import { toast } from '@danbro96/lupira-expo-feedback/toast';
 import type { RootStackParamList } from '../navigation/types';
 
 // Schema-driven editor: the field specs live in the domain package; this screen renders text inputs

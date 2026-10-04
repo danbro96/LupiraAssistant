@@ -3,7 +3,7 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { createPushToken, deletePushToken } from '../api/generated/assistant/push/push';
 import { getDeviceId } from '../secure/device-credentials';
-import { logDebug } from '../../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Expo push registration. The token is a routing address, not a secret — it lives in the hub's
 // registry, and the notices it carries are content-minimal (a generic title plus the item id).

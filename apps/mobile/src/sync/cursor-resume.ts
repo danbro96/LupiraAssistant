@@ -3,7 +3,7 @@ import { getIngestCursor } from '../data/api/generated/location-ingest/ingest/in
 import * as fixesRepo from '../data/db/pending-fixes-repo';
 import * as seqRepo from '../data/db/seq-repo';
 import * as syncState from '../data/db/sync-state-repo';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Drop already-accepted fixes (seq <= lastSeq) and keep the local seq counter at/above server high-water (reinstall).
 

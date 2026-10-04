@@ -1,48 +1,43 @@
-// The estate's shared core, identical across the Lupira frontends — see DevOps
-// Guides/design-tokens.md. Product-specific semantics extend it in the app's own Palette.
-export type ColorScheme = {
-  bg: string;
-  surface: string;
-  primary: string;
-  onPrimary: string;
-  border: string;
-  divider: string;
-  text: string;
-  textMuted: string;
-  textSubtle: string;
-  textDisabled: string;
-  danger: string;
-  /** Identity surfaces only — the mark, the splash, theme-color, primaryColor. Never the UI:
-   *  a second accent competing with `primary` is exactly what the palette work removed. */
-  brand: string;
+import { darkColors as coreDark, lightColors as coreLight, type Palette as CorePalette } from '@danbro96/lupira-tokens-core/color';
+
+/** The shared estate core plus the assistant's own status/banner/toast semantics. */
+export interface Palette extends CorePalette {
+  onAccent: string;
+  warning: string;
+  success: string;
+  pending: string;
+  failed: string;
+  bannerOffline: string;
+  bannerUnreachable: string;
+  bannerSyncing: string;
+  toastBg: string;
+  toastAction: string;
+}
+
+export const lightColors: Palette = {
+  ...coreLight,
+  onAccent: '#ffffff',
+  warning: '#5b4b18',
+  success: '#1f7a4d',
+  pending: '#d8a200',
+  failed: '#b3261e',
+  bannerOffline: '#5b4b18',
+  bannerUnreachable: '#7a1f1f',
+  bannerSyncing: '#0f766e',
+  toastBg: '#2b2f36',
+  toastAction: '#2dd4bf',
 };
 
-export const LIGHT: ColorScheme = {
-  bg: '#ffffff',
-  surface: '#f5f6f8',
-  primary: '#0d9488',
-  onPrimary: '#ffffff',
-  border: '#d4d8e0',
-  divider: '#e3e6ec',
-  text: '#1c2230',
-  textMuted: '#6e7686',
-  textSubtle: '#8a909c',
-  textDisabled: '#9aa0ac',
-  brand: '#E76F51',
-  danger: '#b3261e',
-};
-
-export const DARK: ColorScheme = {
-  bg: '#14171c',
-  surface: '#1e232b',
-  primary: '#2dd4bf',
-  onPrimary: '#042f2e',
-  border: '#2c333d',
-  divider: '#252b33',
-  text: '#e6e9ee',
-  textMuted: '#9aa3b2',
-  textSubtle: '#7c8492',
-  textDisabled: '#5b626e',
-  brand: '#E76F51',
-  danger: '#f2675e',
+export const darkColors: Palette = {
+  ...coreDark,
+  onAccent: '#ffffff',
+  warning: '#d8b24a',
+  success: '#5fd49b',
+  pending: '#d8a200',
+  failed: '#f2675e',
+  bannerOffline: '#5b4b18',
+  bannerUnreachable: '#7a1f1f',
+  bannerSyncing: '#115e59',
+  toastBg: '#2b2f36',
+  toastAction: '#2dd4bf',
 };

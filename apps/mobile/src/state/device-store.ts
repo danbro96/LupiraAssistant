@@ -14,7 +14,7 @@ import * as summariesRepo from '../data/db/pending-summaries-repo';
 import * as syncState from '../data/db/sync-state-repo';
 import type { DeviceKind, RegisterDeviceResponse } from '../data/api/generated/location/models';
 import type { HealthRecordDto } from '../data/api/generated/health/models';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Non-secret mirror of the registered device; the apiKey lives ONLY in secure-store.
 

@@ -5,8 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useArchive } from '../../state/archive-store';
 import type { ArchiveSearchHitDto } from '../../data/api/generated/comms/models';
-import { Button } from '../components/Button';
-import { TextField } from '../components/TextField';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 

@@ -13,12 +13,13 @@ vi.mock('expo-secure-store', () => ({
     return Promise.resolve();
   }),
 }));
-vi.mock('../debug/log', () => ({ logDebug: vi.fn() }));
+vi.mock('@danbro96/lupira-expo-diagnostics/log', () => ({ logDebug: vi.fn() }));
 // expo-auth-session / expo-haptics reach react-native, which the node env cannot parse.
-vi.mock('../data/auth/oidc', () => ({ refreshTokens: vi.fn(), RefreshError: class extends Error {} }));
+vi.mock('../data/auth/oidc', () => ({ oidc: { refreshTokens: vi.fn() } }));
+vi.mock('@danbro96/lupira-expo-oidc/oidc', () => ({ RefreshError: class extends Error {} }));
 vi.mock('../data/push/push-session', () => ({ dropPushRegistration: vi.fn() }));
 vi.mock('../data/secure/device-credentials', () => ({ getApiKey: vi.fn() }));
-vi.mock('../feedback/toast', () => ({ toast: vi.fn() }));
+vi.mock('@danbro96/lupira-expo-feedback/toast', () => ({ toast: vi.fn() }));
 
 const { useAuth } = await import('./auth-store');
 const { SECURE_KEYS } = await import('../config/secure-keys');

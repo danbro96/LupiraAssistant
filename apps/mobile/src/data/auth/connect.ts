@@ -1,7 +1,7 @@
 import * as WebBrowser from 'expo-web-browser';
 import { OIDC_SCHEME } from './oidc-config';
 import { joinUrl } from '../api/http';
-import { logDebug } from '../../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Launches assistant-api's hosted offline-grant enrollment. The hub (a confidential Authentik client)
 // runs the server-side auth-code consent and stores the per-user refresh token; the app only opens the

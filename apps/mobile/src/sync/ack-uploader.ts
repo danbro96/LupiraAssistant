@@ -7,8 +7,8 @@ import {
 } from '../data/api/generated/assistant/inbox/inbox';
 import type { ResolveProposalRequest, AnswerCheckInRequest } from '../data/api/generated/assistant/models';
 import { classifyAckStatus, parseAckPayload, type AnswerPayload, type ResolvePayload } from '@lupira/assistant-domain/ack';
-import { ApiError } from '../domain/api-error';
-import { logDebug } from '../debug/log';
+import { ApiError } from '@danbro96/lupira-http/apiError';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 const BATCH = 20;
 

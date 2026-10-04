@@ -6,7 +6,7 @@ import * as collectorMeta from '../data/db/collector-meta-repo';
 import { MotionState } from '../domain/motion-state';
 import { useSyncStatus } from '../sync/sync-status';
 import { kickSync } from '../sync/sync-engine';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // `collectingDesired` in collector_meta is authoritative so launch reconciliation knows the user's intent.
 

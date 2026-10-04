@@ -36,7 +36,7 @@ flowchart LR
 ## Foundation it reuses
 The app is already built on the primitives the new surfaces need; they **extend** these, nothing is reinvented.
 
-- **Layered architecture**, downward-only, enforced by `eslint-plugin-boundaries` v7 ([apps/mobile/eslint.config.mjs](../apps/mobile/eslint.config.mjs)). The spine: `domain → data → {collector, sync} → state → ui`, with cross-cutting leaves (`config`, `debug`, `feedback`, `polyfills`) importable by anyone but importing no app layer. `collector` (headless background tasks) and `sync` may **not** reach `state`/`ui`; the sync-status store lives inside `sync/`, so `sync` never imports `state`.
+- **Layered architecture**, downward-only, enforced by `eslint-plugin-boundaries` v7 ([apps/mobile/eslint.config.mjs](../apps/mobile/eslint.config.mjs)). The spine: `domain → data → {collector, sync} → state → ui`, with the cross-cutting leaf `config` importable by anyone but importing no app layer; the logger, toast/haptics and crypto polyfill come from `@danbro96/lupira-expo-*` packages. `collector` (headless background tasks) and `sync` may **not** reach `state`/`ui`; the sync-status store lives inside `sync/`, so `sync` never imports `state`.
 
 ```mermaid
 graph TD

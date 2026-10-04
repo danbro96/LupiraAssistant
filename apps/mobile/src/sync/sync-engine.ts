@@ -7,7 +7,7 @@ import { runAckUpload } from './ack-uploader';
 import { resumeFromCursor } from './cursor-resume';
 import { pollTrackingState } from './pause-poll';
 import { refreshSyncStatus, useSyncStatus } from './sync-status';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Single-flight lock: all triggers (reconnect, foreground, background task, explicit kicks) funnel through one cycle.
 

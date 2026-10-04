@@ -10,15 +10,15 @@ import { useSyncStatus, refreshSyncStatus } from '../../sync/sync-status';
 import { kickSync } from '../../sync/sync-engine';
 import { useAuth } from '../../state/auth-store';
 import { APP_VERSION } from '../../config/env';
-import { UPDATE_LABEL } from '../buildInfo';
+import { UPDATE_LABEL } from '@danbro96/lupira-expo-diagnostics/buildInfo';
 import { useInbox } from '../../state/inbox-store';
 import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
 import { getDb } from '../../data/db/db';
-import { Button } from '../components/Button';
-import { useConfirm } from '../components/ConfirmDialog';
+import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { useConfirm } from '@danbro96/lupira-expo-paper/components/ConfirmDialog';
 import { spacing, type Palette, useColors } from '../theme';
-import { toast } from '../../feedback/toast';
+import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 type Styles = ReturnType<typeof makeStyles>;
 

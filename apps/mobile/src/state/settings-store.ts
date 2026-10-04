@@ -3,7 +3,7 @@ import { getPreferences, setPreferences } from '../data/api/generated/assistant/
 import { listConnectors } from '../data/api/generated/comms/archive/archive';
 import type { PreferencesResponse, PreferencesUpdateRequest } from '../data/api/generated/assistant/models';
 import type { ConnectorStatusDto } from '../data/api/generated/comms/models';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Delivery preferences (hub) + capture status (comms). Both are online reads; preferences write
 // straight through — they're the user's own config, so there's no consent gate and no ack queue.

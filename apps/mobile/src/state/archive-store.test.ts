@@ -7,7 +7,7 @@ vi.mock('../data/api/generated/comms/archive/archive', () => ({
   listConversations: vi.fn(),
   listMessages: (id: string, params: ListMessagesParams) => listMessages(id, params),
 }));
-vi.mock('../debug/log', () => ({ logDebug: vi.fn() }));
+vi.mock('@danbro96/lupira-expo-diagnostics/log', () => ({ logDebug: vi.fn() }));
 
 const { useArchive, THREAD_PAGE_SIZE } = await import('./archive-store');
 

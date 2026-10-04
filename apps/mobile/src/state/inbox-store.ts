@@ -7,7 +7,7 @@ import { getInbox } from '../data/api/generated/assistant/inbox/inbox';
 import { kickSync } from '../sync/sync-engine';
 import { mapInboxResponse, parseCachedInbox, type InboxItemView } from '@lupira/assistant-domain/inbox-item';
 import type { AnswerPayload, ResolvePayload } from '@lupira/assistant-domain/ack';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // The assistant surface store: the last cached feed plus the on-behalf-of grant status (live via the
 // BFF). The feed fetch is wired against the hub's /inbox — see refresh().

@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RegisterDeviceScreen } from '../screens/RegisterDeviceScreen';
 import { InboxScreen } from '../screens/InboxScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
-import { DebugLogScreen } from '../screens/DebugLogScreen';
+import { DebugLogScreen } from '@danbro96/lupira-expo-diagnostics/DebugLogScreen';
 import { DeveloperScreen } from '../screens/DeveloperScreen';
 import { EditProposalScreen } from '../screens/EditProposalScreen';
 import { ArchiveSearchScreen } from '../screens/ArchiveSearchScreen';
@@ -16,7 +16,7 @@ import { useDevice } from '../../state/device-store';
 import { useColors } from '../theme';
 import type { RootStackParamList, TabParamList } from './types';
 import { ICONS } from '../icons';
-import { SettingsButton } from '../components/SettingsButton';
+import { SettingsButton } from '@danbro96/lupira-expo-paper/components/SettingsButton';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<TabParamList>();

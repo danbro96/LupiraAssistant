@@ -2,7 +2,7 @@ import type { Db } from '../data/db/db';
 import { getIngestState } from '../data/api/generated/location-ingest/ingest/ingest';
 import * as syncState from '../data/db/sync-state-repo';
 import * as collectorMeta from '../data/db/collector-meta-repo';
-import { logDebug } from '../debug/log';
+import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Writes the paused flag to both sync_state (UI) and collector_meta (collector's cross-context read).
 
