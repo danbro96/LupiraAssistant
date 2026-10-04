@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { PaperProvider } from 'react-native-paper';
 import { RootStack } from './src/ui/navigation/RootStack';
+import { useAutoUpdate } from './src/ui/hooks/useAutoUpdate';
 import { navigationRef } from './src/ui/navigation/notification-routing';
 import { startNotificationHandling, handleLaunchNotice } from './src/ui/notifications';
 import { registerPushToken } from './src/data/push/push-registration';
@@ -46,6 +47,7 @@ function ErrorFallback({ palette }: { palette: Palette }) {
 }
 
 function App() {
+  useAutoUpdate();
   const authLoaded = useAuth((s) => s.loaded);
   const deviceLoaded = useDevice((s) => s.loaded);
   const scheme = useColorScheme();
