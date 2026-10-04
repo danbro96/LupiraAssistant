@@ -1,12 +1,14 @@
+# syntax=docker/dockerfile:1
 # BFF image: auth + YARP proxy to assistant-api / comms-api. The SPA joins this image when it lands
 # (cal-web pattern: build the client, serve from wwwroot). Build context = repo root.
 
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
+COPY nuget.config ./
 COPY src/LupiraAssistantBff/ ./LupiraAssistantBff/
 WORKDIR /src/LupiraAssistantBff
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet restore "./LupiraAssistantBff.csproj"
+RUN --mount=type=secret,id=packages_token,env=PACKAGES_TOKEN dotnet restore "./LupiraAssistantBff.csproj"
 RUN dotnet publish "./LupiraAssistantBff.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final

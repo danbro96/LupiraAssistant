@@ -1,4 +1,14 @@
 {
+  "clusters": {
+    "assistant-api": { "prefix": "/api", "announcePrefix": true },
+    "comms-api": { "prefix": "/comms-api" },
+    "location-api": { "prefix": "/location-api" },
+    "health-api": { "prefix": "/health-api" }
+  },
+  "groups": {
+    "anonymous": { "policy": "Anonymous" },
+    "device": { "policy": "Anonymous", "prefixed": false, "credential": "deviceKey" }
+  },
   "operations": {
     "assistant-api": [
       "DELETE /push-tokens/{token}",

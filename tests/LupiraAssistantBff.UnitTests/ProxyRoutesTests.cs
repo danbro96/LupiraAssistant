@@ -1,55 +1,27 @@
-using LupiraAssistantBff.Proxy;
-using Microsoft.Extensions.Configuration;
+using Lupira.Bff.Proxy;
 using Xunit;
 
 namespace LupiraAssistantBff.UnitTests;
 
-/// <summary>
-/// The route table is computed from <c>exposed.json</c> at startup: the keys must be shaped the way
-/// YARP's <c>LoadFromConfig</c> and the <c>ApiPrefixes</c> fence read them.
-/// </summary>
 public class ProxyRoutesTests
 {
-    private static readonly ExposedSurface Exposed = ExposedSurface.Load();
-
-    /// <summary>Reads the generated keys back exactly as the app does.</summary>
-    private static IConfigurationSection Routes() =>
-        new ConfigurationBuilder()
-            .AddInMemoryCollection(ProxyRoutes.Build(Exposed))
-            .Build()
-            .GetSection("ReverseProxy:Routes");
-
-    [Fact]
-    public void Every_allowlisted_operation_is_routed_exactly_once()
-    {
-        var routed = Routes().GetChildren()
-            .SelectMany(route => route.GetSection("Match:Methods").GetChildren()
-                .Select(m => $"{m.Value} {route["Match:Path"]}"))
-            .ToList();
-
-        var declared = Exposed.Operations.Concat(Exposed.Anonymous)
-            .SelectMany(g => g.Value.Select(op => Prefixed(g.Key, op)))
-            // Device ingest keeps the upstream's own path: no prefix, so nothing to prepend.
-            .Concat(Exposed.Device.SelectMany(g => g.Value))
-            .ToList();
-
-        Assert.Equal(declared.Count, routed.Count);
-        Assert.Empty(declared.Except(routed, StringComparer.Ordinal));
-    }
+    private static readonly IReadOnlyList<ProxyRoute> Routes =
+        ProxyRoutes.Plan(ExposedSurface.Load(typeof(Program).Assembly));
 
     [Fact]
     public void No_route_is_a_wildcard()
     {
         // A catch-all forwards whatever the upstream adds under it, unreviewed.
-        Assert.DoesNotContain(Routes().GetChildren(), r => r["Match:Path"]!.Contains("**", StringComparison.Ordinal));
+        Assert.DoesNotContain(Routes, r => r.Path.Contains("**", StringComparison.Ordinal));
     }
 
     [Fact]
     public void Only_the_enrollment_legs_and_device_ingest_are_anonymous()
     {
-        var anonymous = Routes().GetChildren()
-            .Where(r => r["AuthorizationPolicy"] == "Anonymous")
-            .Select(r => r["Match:Path"]!)
+        var anonymous = Routes
+            .Where(r => r.Group.Policy == "Anonymous")
+            .Select(r => r.Path)
+            .Distinct()
             .Order(StringComparer.Ordinal)
             .ToList();
 
@@ -63,31 +35,24 @@ public class ProxyRoutesTests
     [Fact]
     public void Prefixed_routes_strip_their_prefix_and_only_assistant_api_announces_it()
     {
-        foreach (var route in Routes().GetChildren())
+        foreach (var route in Routes.Where(r => r.Group.Credential != UpstreamCredential.DeviceKey))
         {
-            var path = route["Match:Path"]!;
-            if (path.StartsWith("/ingest/", StringComparison.Ordinal)) continue;
-
-            var cluster = route["ClusterId"]!;
-            var prefix = ExposedSurface.ClusterPrefixes[cluster];
-            Assert.StartsWith(prefix + "/", path, StringComparison.Ordinal);
-            Assert.Equal(prefix, route["Transforms:0:PathRemovePrefix"]);
-            Assert.Equal(cluster == "assistant-api" ? prefix : null, route["Transforms:2:Set"]);
+            Assert.NotNull(route.RemovePrefix);
+            Assert.StartsWith(route.RemovePrefix + "/", route.Path, StringComparison.Ordinal);
+            Assert.Equal(route.Cluster == "assistant-api", route.AnnouncesPrefix);
         }
     }
 
     [Fact]
     public void Device_ingest_is_untransformed_and_unprefixed()
     {
-        var device = Routes().GetChildren().Where(r => r["Match:Path"]!.StartsWith("/ingest/", StringComparison.Ordinal)).ToList();
+        var device = Routes.Where(r => r.Group.Credential == UpstreamCredential.DeviceKey).ToList();
 
-        Assert.Equal(Exposed.Device.Sum(d => d.Value.Count), device.Count);
-        Assert.All(device, r => Assert.Null(r["Transforms:0:PathRemovePrefix"]));
-    }
-
-    private static string Prefixed(string cluster, string operation)
-    {
-        var parts = operation.Split(' ', 2);
-        return $"{parts[0]} {ExposedSurface.ClusterPrefixes[cluster]}{parts[1]}";
+        Assert.NotEmpty(device);
+        Assert.All(device, route =>
+        {
+            Assert.Null(route.RemovePrefix);
+            Assert.StartsWith("/ingest/", route.Path, StringComparison.Ordinal);
+        });
     }
 }

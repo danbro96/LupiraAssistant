@@ -42,6 +42,7 @@ public sealed class BffTestFactory : WebApplicationFactory<Program>, IAsyncLifet
         foreach (var cluster in new[] { "assistant-api", "comms-api", "location-api", "health-api" })
             builder.UseSetting($"ReverseProxy:Clusters:{cluster}:Destinations:primary:Address", Upstream.Address);
         builder.UseSetting("Auth:Bearer:Authority", Issuer);
+        builder.UseSetting("OTEL_EXPORTER_OTLP_ENDPOINT", "http://127.0.0.1:9");
         builder.ConfigureTestServices(services =>
         {
             // Local signing key instead of Authentik discovery.
