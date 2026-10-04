@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lupira.Bff.Auth" Version="0.2.0" />
+    <PackageReference Include="Lupira.Bff.Auth" Version="0.2.1" />
     <PackageReference Include="Lupira.Bff.Proxy" Version="0.2.1" />
     <PackageReference Include="Lupira.Build" Version="1.1.0" PrivateAssets="all" />
     <PackageReference Include="Lupira.Hosting.Defaults" Version="0.1.0" />
