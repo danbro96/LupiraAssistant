@@ -22,6 +22,48 @@ import { logDebug } from '../../debug/log';
 // Dismisses the in-app browser when the auth redirect returns.
 WebBrowser.maybeCompleteAuthSession();
 
+async function exchangeCodeForSession(
+  discovery: AuthSession.DiscoveryDocument,
+  request: AuthSession.AuthRequest,
+  code: string,
+  redirectUri: string,
+  setBusy: (busy: boolean) => void,
+  setError: (error: string | null) => void,
+) {
+  setBusy(true);
+  setError(null);
+  try {
+    const tokenEndpoint = discovery.tokenEndpoint;
+    if (!tokenEndpoint) {
+      setError('Discovery returned no token endpoint.');
+      return;
+    }
+    const token = await exchangeAuthCode({
+      tokenEndpoint,
+      code,
+      redirectUri,
+      codeVerifier: request.codeVerifier,
+    });
+    const claims = decodeJwt(token.idToken ?? token.accessToken);
+    const email = (claims.email as string) ?? (claims.preferred_username as string) ?? (claims.sub as string) ?? '';
+    const name = (claims.name as string) ?? undefined;
+    await useAuth.getState().setSession(
+      {
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken,
+        expiresAt: Date.now() + (token.expiresIn ?? 3600) * 1000,
+      },
+      { sub: email, displayName: name },
+    );
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    logDebug('register:signin-error', msg);
+    setError(msg);
+  } finally {
+    setBusy(false);
+  }
+}
+
 export function RegisterDeviceScreen() {
   const c = useColors();
   const styles = useMemo(() => makeStyles(c), [c]);
@@ -48,38 +90,7 @@ export function RegisterDeviceScreen() {
       return null;
     });
     if (!response || response.type !== 'success' || !discovery || !request) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const tokenEndpoint = discovery.tokenEndpoint;
-      if (!tokenEndpoint) {
-        setError('Discovery returned no token endpoint.');
-        return;
-      }
-      const token = await exchangeAuthCode({
-        tokenEndpoint,
-        code: response.params.code,
-        redirectUri,
-        codeVerifier: request.codeVerifier,
-      });
-      const claims = decodeJwt(token.idToken ?? token.accessToken);
-      const email = (claims.email as string) ?? (claims.preferred_username as string) ?? (claims.sub as string) ?? '';
-      const name = (claims.name as string) ?? undefined;
-      await useAuth.getState().setSession(
-        {
-          accessToken: token.accessToken,
-          refreshToken: token.refreshToken,
-          expiresAt: Date.now() + (token.expiresIn ?? 3600) * 1000,
-        },
-        { sub: email, displayName: name },
-      );
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      logDebug('register:signin-error', msg);
-      setError(msg);
-    } finally {
-      setBusy(false);
-    }
+    await exchangeCodeForSession(discovery, request, response.params.code, redirectUri, setBusy, setError);
   }
 
   async function handleRegister() {
