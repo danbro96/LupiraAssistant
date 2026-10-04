@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { DEFAULT_API_URL, DEFAULT_AUTH_MODE, type AuthMode } from '../config/env';
 import { SECURE_KEYS } from '../config/secure-keys';
 import { setOidcAuthPort, setDeviceKeyPort } from '../data/api/auth-ports';
-import { RefreshError } from '@danbro96/lupira-expo-oidc/oidc';
+import { createTokenRefresher, secureSessionStore } from '@danbro96/lupira-expo-oidc/tokenSession';
 import { oidc } from '../data/auth/oidc';
 import { dropPushRegistration } from '../data/push/push-session';
 import { getApiKey } from '../data/secure/device-credentials';
@@ -12,7 +12,7 @@ import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 // OIDC session — every BFF call except device ingest, which uses the device key.
 
-let refreshing: Promise<string | null> | null = null;
+const sessionStore = secureSessionStore('lupira.assistant.oidc');
 
 export interface AuthUser {
   sub: string; // email / OIDC subject
@@ -55,12 +55,10 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => ({
   user: null,
 
   load: async () => {
-    const [authMode, apiUrl, token, refreshToken, expiresAt, userSub, userName] = await Promise.all([
+    const [authMode, apiUrl, session, userSub, userName] = await Promise.all([
       SecureStore.getItemAsync(SECURE_KEYS.authMode),
       SecureStore.getItemAsync(SECURE_KEYS.apiUrl),
-      SecureStore.getItemAsync(SECURE_KEYS.oidcToken),
-      SecureStore.getItemAsync(SECURE_KEYS.oidcRefresh),
-      SecureStore.getItemAsync(SECURE_KEYS.oidcExpires),
+      sessionStore.load(),
       SecureStore.getItemAsync(SECURE_KEYS.userSub),
       SecureStore.getItemAsync(SECURE_KEYS.userName),
     ]);
@@ -68,9 +66,9 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => ({
       loaded: true,
       authMode: (authMode as AuthMode | null) ?? DEFAULT_AUTH_MODE,
       apiUrl: apiUrl || DEFAULT_API_URL,
-      token: token ?? null,
-      refreshToken: refreshToken ?? null,
-      expiresAt: expiresAt ? Number(expiresAt) : null,
+      token: session.token,
+      refreshToken: session.refreshToken,
+      expiresAt: session.expiresAt || null,
       user: userSub ? { sub: userSub, displayName: userName ?? undefined } : null,
     });
   },
@@ -96,11 +94,7 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => ({
     });
     try {
       await Promise.all([
-        SecureStore.setItemAsync(SECURE_KEYS.oidcToken, session.accessToken),
-        session.refreshToken
-          ? SecureStore.setItemAsync(SECURE_KEYS.oidcRefresh, session.refreshToken)
-          : SecureStore.deleteItemAsync(SECURE_KEYS.oidcRefresh),
-        SecureStore.setItemAsync(SECURE_KEYS.oidcExpires, String(session.expiresAt)),
+        sessionStore.save({ token: session.accessToken, refreshToken: session.refreshToken ?? null, expiresAt: session.expiresAt }),
         SecureStore.setItemAsync(SECURE_KEYS.userSub, user.sub),
         user.displayName
           ? SecureStore.setItemAsync(SECURE_KEYS.userName, user.displayName)
@@ -117,58 +111,32 @@ export const useAuth = create<AuthState & AuthActions>((set, get) => ({
     // would otherwise keep waking a signed-out device.
     await dropPushRegistration();
     await Promise.all([
-      SecureStore.deleteItemAsync(SECURE_KEYS.oidcToken),
-      SecureStore.deleteItemAsync(SECURE_KEYS.oidcRefresh),
-      SecureStore.deleteItemAsync(SECURE_KEYS.oidcExpires),
+      sessionStore.clear(),
       SecureStore.deleteItemAsync(SECURE_KEYS.userSub),
       SecureStore.deleteItemAsync(SECURE_KEYS.userName),
     ]);
     set({ token: null, refreshToken: null, expiresAt: null, user: null });
   },
 
-  refreshIfNeeded: async (opts) => {
-    const { token, refreshToken, expiresAt, user } = get();
-    if (!token) return null;
-    const force = opts?.force ?? false;
-    if (force && opts?.sentToken && opts.sentToken !== token) return token;
-    const fresh = expiresAt ? Date.now() < expiresAt - 60_000 : false;
-    if (!force && fresh) return token;
-    if (!refreshToken || !user) {
-      if (force) {
-        await get().clearSession({ reason: 'expired' });
-        return null;
-      }
-      return token;
-    }
-    if (refreshing) return refreshing;
-    refreshing = (async (): Promise<string | null> => {
-      try {
-        const t = await oidc.refreshTokens(refreshToken);
-        if (!t.accessToken) return token;
-        const next: Session = {
-          accessToken: t.accessToken,
-          refreshToken: t.refreshToken ?? refreshToken,
-          expiresAt: Date.now() + (t.expiresIn ?? 3600) * 1000,
-        };
-        await get().setSession(next, user);
-        return next.accessToken;
-      } catch (e) {
-        if (e instanceof RefreshError && e.definitive) {
-          logDebug('auth:logout', `definitive: ${e.message}`);
-          await get().clearSession({ reason: 'expired' });
-          return null;
-        }
-        logDebug('auth:refresh:transient', e instanceof Error ? e.message : String(e));
-        return token;
-      }
-    })().finally(() => {
-      refreshing = null;
-    });
-    return refreshing;
-  },
+  refreshIfNeeded: (opts) => refresh(opts),
 
   isAuthenticated: () => !!get().token && !!get().user,
 }));
+
+const refresh = createTokenRefresher({
+  read: () => {
+    const { token, refreshToken, expiresAt, user } = useAuth.getState();
+    return { token, refreshToken: user ? refreshToken : null, expiresAt: expiresAt ?? 0 };
+  },
+  refreshTokens: (refreshToken) => oidc.refreshTokens(refreshToken),
+  apply: async (t, previous) => {
+    const { user, setSession } = useAuth.getState();
+    if (!user) return;
+    await setSession({ accessToken: t.accessToken, refreshToken: t.refreshToken ?? previous, expiresAt: Date.now() + (t.expiresIn ?? 3600) * 1000 }, user);
+  },
+  signOut: () => useAuth.getState().clearSession({ reason: 'expired' }),
+  log: logDebug,
+});
 
 // Runs at module load (App.tsx imports the store during bootstrap, before any request fires).
 const apiUrl = (): string => useAuth.getState().apiUrl;

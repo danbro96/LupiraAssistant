@@ -5,9 +5,6 @@ export const SECURE_KEYS = {
   authMode: 'lupira.assistant.authMode',
   debugEnabled: 'lupira.assistant.debugEnabled',
 
-  oidcToken: 'lupira.assistant.oidc.token',
-  oidcRefresh: 'lupira.assistant.oidc.refreshToken',
-  oidcExpires: 'lupira.assistant.oidc.expiresAt',
   userSub: 'lupira.assistant.oidc.userSub',
   userName: 'lupira.assistant.oidc.userName',
 
