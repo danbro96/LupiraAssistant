@@ -9,6 +9,8 @@ import { useCollector } from '../../state/collector-store';
 import { useSyncStatus, refreshSyncStatus } from '../../sync/sync-status';
 import { kickSync } from '../../sync/sync-engine';
 import { useAuth } from '../../state/auth-store';
+import { APP_VERSION } from '../../config/env';
+import { UPDATE_LABEL } from '../buildInfo';
 import { useInbox } from '../../state/inbox-store';
 import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
@@ -108,6 +110,7 @@ export function SettingsScreen() {
       <Row label="Kind" value={device.kind ?? '—'} styles={styles} />
       <Row label="Record" value={device.recordSlug ?? '—'} styles={styles} />
       <Row label="Key id" value={device.keyId ?? '—'} styles={styles} mono />
+      <Row label="Version" value={`${APP_VERSION} · ${UPDATE_LABEL}`} styles={styles} />
 
       <List.Subheader>Collection</List.Subheader>
       <List.Item
