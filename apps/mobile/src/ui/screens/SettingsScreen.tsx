@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { List, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -24,7 +24,7 @@ type Styles = ReturnType<typeof makeStyles>;
 
 export function SettingsScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const debugEnabled = usePrefs((s) => s.debugEnabled);
   const confirm = useConfirm();
@@ -167,7 +167,7 @@ export function SettingsScreen() {
   );
 }
 
-const Row = memo(function Row({
+function Row({
   label,
   value,
   styles,
@@ -189,7 +189,7 @@ const Row = memo(function Row({
       )}
     />
   );
-});
+}
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({

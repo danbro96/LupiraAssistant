@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -23,7 +23,7 @@ type Styles = ReturnType<typeof makeStyles>;
 
 export function InboxScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
 
   const items = useInbox((s) => s.items);
   const grantStatus = useInbox((s) => s.grantStatus);
@@ -33,11 +33,11 @@ export function InboxScreen() {
   // Drafts live here, not in the card: the list virtualizes, and an unmounted card would lose them.
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  const onRefresh = useCallback(async () => {
+  async function onRefresh() {
     setRefreshing(true);
     await useInbox.getState().refresh();
     setRefreshing(false);
-  }, []);
+  }
 
   // Pull-on-open freshness (until push lands): the cached feed renders instantly, then updates.
   useEffect(() => {
@@ -55,22 +55,19 @@ export function InboxScreen() {
     setConnecting(false);
   }
 
-  const onAnswerChange = useCallback((id: string, text: string) => {
+  const onAnswerChange = (id: string, text: string) => {
     setAnswers((prev) => ({ ...prev, [id]: text }));
-  }, []);
+  };
 
-  const renderItem = useCallback(
-    ({ item }: { item: InboxItemView }) => {
-      if (item.kind === 'question') {
-        return (
-          <QuestionCard item={item} answer={answers[item.id] ?? ''} onAnswerChange={onAnswerChange} styles={styles} />
-        );
-      }
-      if (item.kind === 'notice') return <NoticeCard item={item} styles={styles} />;
-      return <ProposalCard item={item} styles={styles} />;
-    },
-    [answers, onAnswerChange, styles],
-  );
+  const renderItem = ({ item }: { item: InboxItemView }) => {
+    if (item.kind === 'question') {
+      return (
+        <QuestionCard item={item} answer={answers[item.id] ?? ''} onAnswerChange={onAnswerChange} styles={styles} />
+      );
+    }
+    if (item.kind === 'notice') return <NoticeCard item={item} styles={styles} />;
+    return <ProposalCard item={item} styles={styles} />;
+  };
 
   return (
     <FlatList
@@ -104,7 +101,7 @@ export function InboxScreen() {
   );
 }
 
-const ItemHeader = memo(function ItemHeader({ item, styles }: { item: InboxItemView; styles: Styles }) {
+function ItemHeader({ item, styles }: { item: InboxItemView; styles: Styles }) {
   return (
     <>
       <View style={styles.itemHeader}>
@@ -115,7 +112,7 @@ const ItemHeader = memo(function ItemHeader({ item, styles }: { item: InboxItemV
       {item.summary ? <Text style={styles.summary}>{item.summary}</Text> : null}
     </>
   );
-});
+}
 
 const ProposalCard = memo(function ProposalCard({ item, styles }: { item: InboxItemView; styles: Styles }) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();

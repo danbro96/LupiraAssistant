@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Switch, Text } from 'react-native-paper';
 import { useSettings } from '../../state/settings-store';
@@ -12,7 +12,7 @@ import { toast } from '../../feedback/toast';
 
 export function PreferencesScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
 
   const preferences = useSettings((s) => s.preferences);
   const saving = useSettings((s) => s.savingPreferences);

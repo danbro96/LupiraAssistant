@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { useSettings } from '../../state/settings-store';
@@ -12,7 +12,7 @@ type Styles = ReturnType<typeof makeStyles>;
 
 export function ConnectorsScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
 
   const connectors = useSettings((s) => s.connectors);
   const loading = useSettings((s) => s.loadingConnectors);
@@ -50,7 +50,7 @@ export function ConnectorsScreen() {
   );
 }
 
-const ConnectorCard = memo(function ConnectorCard({
+function ConnectorCard({
   connector,
   styles,
 }: {
@@ -73,7 +73,7 @@ const ConnectorCard = memo(function ConnectorCard({
       {connected ? <Text style={styles.mono}>{connector.connectors.join(', ')}</Text> : null}
     </View>
   );
-});
+}
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({

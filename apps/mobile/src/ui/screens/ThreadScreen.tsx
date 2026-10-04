@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { memo, useEffect } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { useRoute, type RouteProp } from '@react-navigation/native';
@@ -15,7 +15,7 @@ type Styles = ReturnType<typeof makeStyles>;
 
 export function ThreadScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
   const route = useRoute<RouteProp<RootStackParamList, 'Thread'>>();
   const { conversationId, aroundMessageId } = route.params;
 
@@ -28,19 +28,16 @@ export function ThreadScreen() {
   }, [conversationId, aroundMessageId]);
 
   // `inverted` needs newest-first data; the store keeps the window chronological.
-  const data = useMemo(() => [...messages].reverse(), [messages]);
+  const data = [...messages].reverse();
 
-  const renderItem = useCallback(
-    ({ item, index }: { item: ConversationMessageDto; index: number }) => (
-      <MessageRow
-        message={item}
-        // In inverted order the visually-preceding row is the next index.
-        previous={data[index + 1]}
-        highlighted={item.id === aroundMessageId}
-        styles={styles}
-      />
-    ),
-    [data, aroundMessageId, styles],
+  const renderItem = ({ item, index }: { item: ConversationMessageDto; index: number }) => (
+    <MessageRow
+      message={item}
+      // In inverted order the visually-preceding row is the next index.
+      previous={data[index + 1]}
+      highlighted={item.id === aroundMessageId}
+      styles={styles}
+    />
   );
 
   return (

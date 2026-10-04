@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import * as AuthSession from 'expo-auth-session';
@@ -66,7 +66,7 @@ async function exchangeCodeForSession(
 
 export function RegisterDeviceScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
 
   const authed = useAuth((s) => !!s.token && !!s.user);
   const userEmail = useAuth((s) => s.user?.sub ?? null);

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Switch, Text } from 'react-native-paper';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -25,7 +25,7 @@ import type { RootStackParamList } from '../navigation/types';
 
 export function EditProposalScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'EditProposal'>>();
 

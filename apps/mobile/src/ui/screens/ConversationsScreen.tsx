@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,7 @@ import type { RootStackParamList } from '../navigation/types';
 
 export function ConversationsScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const conversations = useArchive((s) => s.conversations);

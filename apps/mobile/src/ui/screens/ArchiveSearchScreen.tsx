@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -17,7 +17,7 @@ type Styles = ReturnType<typeof makeStyles>;
 
 export function ArchiveSearchScreen() {
   const c = useColors();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const styles = makeStyles(c);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const hits = useArchive((s) => s.hits);
@@ -30,16 +30,12 @@ export function ArchiveSearchScreen() {
     void useArchive.getState().search({ q, participant: participant.trim() || undefined });
   }
 
-  const onOpenHit = useCallback(
-    (hit: ArchiveSearchHitDto) => {
-      navigation.navigate('Thread', { conversationId: hit.conversationId, aroundMessageId: hit.messageId });
-    },
-    [navigation],
-  );
+  const onOpenHit = (hit: ArchiveSearchHitDto) => {
+    navigation.navigate('Thread', { conversationId: hit.conversationId, aroundMessageId: hit.messageId });
+  };
 
-  const renderItem = useCallback(
-    ({ item }: { item: ArchiveSearchHitDto }) => <HitRow hit={item} onPress={onOpenHit} styles={styles} />,
-    [onOpenHit, styles],
+  const renderItem = ({ item }: { item: ArchiveSearchHitDto }) => (
+    <HitRow hit={item} onPress={onOpenHit} styles={styles} />
   );
 
   return (
