@@ -64,8 +64,7 @@ export default [
           { from: { element: { type: 'polyfills' } }, allow: to('polyfills') },
         ],
       }],
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      ...reactHooks.configs['recommended-latest'].rules,
     },
   },
 ];

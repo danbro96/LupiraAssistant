@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
 import * as AuthSession from 'expo-auth-session';
@@ -31,7 +31,7 @@ export function RegisterDeviceScreen() {
 
   const discovery = AuthSession.useAutoDiscovery(OIDC_ISSUER);
   const redirectUri = AuthSession.makeRedirectUri({ scheme: OIDC_SCHEME, path: OIDC_REDIRECT_PATH });
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
+  const [request, , promptAsync] = AuthSession.useAuthRequest(
     { clientId: OIDC_CLIENT_ID, scopes: OIDC_SCOPES, redirectUri, usePKCE: true },
     discovery,
   );
@@ -42,52 +42,45 @@ export function RegisterDeviceScreen() {
 
   async function handleSignIn() {
     setError(null);
-    try {
-      // createTask:false keeps the auth tab in the app's task so the redirect returns into it.
-      await promptAsync({ createTask: false });
-    } catch (e) {
+    // createTask:false keeps the auth tab in the app's task so the redirect returns into it.
+    const response = await promptAsync({ createTask: false }).catch((e: unknown) => {
       setError(String(e));
+      return null;
+    });
+    if (!response || response.type !== 'success' || !discovery || !request) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const tokenEndpoint = discovery.tokenEndpoint;
+      if (!tokenEndpoint) {
+        setError('Discovery returned no token endpoint.');
+        return;
+      }
+      const token = await exchangeAuthCode({
+        tokenEndpoint,
+        code: response.params.code,
+        redirectUri,
+        codeVerifier: request.codeVerifier,
+      });
+      const claims = decodeJwt(token.idToken ?? token.accessToken);
+      const email = (claims.email as string) ?? (claims.preferred_username as string) ?? (claims.sub as string) ?? '';
+      const name = (claims.name as string) ?? undefined;
+      await useAuth.getState().setSession(
+        {
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
+          expiresAt: Date.now() + (token.expiresIn ?? 3600) * 1000,
+        },
+        { sub: email, displayName: name },
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      logDebug('register:signin-error', msg);
+      setError(msg);
+    } finally {
+      setBusy(false);
     }
   }
-
-  useEffect(() => {
-    if (!response || response.type !== 'success' || !discovery || !request) return;
-    (async () => {
-      setBusy(true);
-      setError(null);
-      try {
-        const tokenEndpoint = discovery.tokenEndpoint;
-        if (!tokenEndpoint) {
-          setError('Discovery returned no token endpoint.');
-          return;
-        }
-        const token = await exchangeAuthCode({
-          tokenEndpoint,
-          code: response.params.code,
-          redirectUri,
-          codeVerifier: request.codeVerifier,
-        });
-        const claims = decodeJwt(token.idToken ?? token.accessToken);
-        const email = (claims.email as string) ?? (claims.preferred_username as string) ?? (claims.sub as string) ?? '';
-        const name = (claims.name as string) ?? undefined;
-        await useAuth.getState().setSession(
-          {
-            accessToken: token.accessToken,
-            refreshToken: token.refreshToken,
-            expiresAt: Date.now() + (token.expiresIn ?? 3600) * 1000,
-          },
-          { sub: email, displayName: name },
-        );
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : String(e);
-        logDebug('register:signin-error', msg);
-        setError(msg);
-      } finally {
-        setBusy(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [response]);
 
   async function handleRegister() {
     setBusy(true);

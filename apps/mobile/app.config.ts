@@ -22,6 +22,7 @@ const config: ExpoConfig = {
   primaryColor: '#E76F51',
   // Fingerprint: a JS-only change keeps the runtime version and ships OTA; a native change needs a build.
   runtimeVersion: { policy: 'fingerprint' },
+  experiments: { reactCompiler: true },
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.lupira.assistant',

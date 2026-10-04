@@ -45,10 +45,8 @@ export function SettingsScreen() {
   }, [device.deviceId]);
 
   useEffect(() => {
-    void collector.hydrate();
-    void collector.refreshPermissions();
-    void refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void useCollector.getState().hydrate();
+    void useCollector.getState().refreshPermissions();
   }, []);
 
   useEffect(() => {

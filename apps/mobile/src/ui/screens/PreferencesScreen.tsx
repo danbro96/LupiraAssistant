@@ -21,19 +21,22 @@ export function PreferencesScreen() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [zone, setZone] = useState('');
+  const [seededFrom, setSeededFrom] = useState<typeof preferences>(null);
 
   useEffect(() => {
     void useSettings.getState().loadPreferences();
   }, []);
 
   // Seed the form once the server state arrives.
-  useEffect(() => {
-    if (!preferences) return;
-    setDigest(preferences.mode === 'Digest');
-    setStart(preferences.quietHoursStart ?? '');
-    setEnd(preferences.quietHoursEnd ?? '');
-    setZone(preferences.timeZone ?? '');
-  }, [preferences]);
+  if (preferences !== seededFrom) {
+    setSeededFrom(preferences);
+    if (preferences) {
+      setDigest(preferences.mode === 'Digest');
+      setStart(preferences.quietHoursStart ?? '');
+      setEnd(preferences.quietHoursEnd ?? '');
+      setZone(preferences.timeZone ?? '');
+    }
+  }
 
   async function onSave() {
     const okSaved = await useSettings.getState().savePreferences({
