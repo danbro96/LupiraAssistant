@@ -12,12 +12,14 @@ import type {
   ConversationMessageDto,
   MessageSource,
 } from '../data/api/generated/comms/models';
-import { mergeThreadPage } from '@lupira/assistant-domain/thread-page';
+import { mergeThreadPage, pageMayHaveMore, threadWindowEnds } from '@lupira/assistant-domain/thread-page';
 import { logDebug } from '../debug/log';
 
 // The generated response types union success with ProblemDetails; a non-2xx already threw by the time
 // these resolve (see http.ts), so the success arm is the only reachable shape — narrow it here.
 const ok = <T,>(res: { data: unknown }): T => res.data as T;
+
+export const THREAD_PAGE_SIZE = 30;
 
 // The comms archive browser: hybrid search, the conversation list, and a chat-style thread reader.
 // Online-only by design — research is a deliberate act, not something the offline cache serves.
@@ -43,6 +45,10 @@ interface ArchiveState {
   threadTitle: string | null;
   threadMessages: ConversationMessageDto[];
   loadingThread: boolean;
+  threadHasOlder: boolean;
+  threadHasNewer: boolean;
+  loadingOlder: boolean;
+  loadingNewer: boolean;
 }
 
 interface ArchiveActions {
@@ -53,6 +59,8 @@ interface ArchiveActions {
   openThread: (conversationId: string, aroundMessageId?: string) => Promise<void>;
   /** Page further back from the oldest loaded message. */
   loadOlder: () => Promise<void>;
+  /** Page forward from the newest loaded message. */
+  loadNewer: () => Promise<void>;
   closeThread: () => void;
 }
 
@@ -67,6 +75,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
   threadTitle: null,
   threadMessages: [],
   loadingThread: false,
+  ...closedThread(),
 
   search: async (filters) => {
     if (filters.q.trim().length === 0) {
@@ -110,12 +119,20 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
   },
 
   openThread: async (conversationId, aroundMessageId) => {
-    set({ threadId: conversationId, threadMessages: [], threadTitle: null, loadingThread: true });
+    set({ threadId: conversationId, threadMessages: [], threadTitle: null, loadingThread: true, ...closedThread() });
     try {
       const data = ok<ConversationMessagesResponse>(
-        await listMessages(conversationId, { around: aroundMessageId }),
+        await listMessages(conversationId, { around: aroundMessageId, limit: THREAD_PAGE_SIZE }),
       );
-      set({ threadTitle: data.title ?? null, threadMessages: data.items, loadingThread: false });
+      if (get().threadId !== conversationId) return;
+      const ends = threadWindowEnds(data.items, THREAD_PAGE_SIZE, aroundMessageId);
+      set({
+        threadTitle: data.title ?? null,
+        threadMessages: data.items,
+        loadingThread: false,
+        threadHasOlder: ends.hasOlder,
+        threadHasNewer: ends.hasNewer,
+      });
     } catch (e) {
       logDebug('archive:thread-error', e instanceof Error ? e.message : String(e));
       set({ loadingThread: false });
@@ -123,19 +140,49 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
   },
 
   loadOlder: async () => {
-    const { threadId, threadMessages, loadingThread } = get();
-    if (!threadId || loadingThread || threadMessages.length === 0) return;
-    set({ loadingThread: true });
+    const { threadId, threadMessages, loadingThread, loadingOlder, threadHasOlder } = get();
+    if (!threadId || loadingThread || loadingOlder || !threadHasOlder || threadMessages.length === 0) return;
+    set({ loadingOlder: true });
     try {
       const data = ok<ConversationMessagesResponse>(
-        await listMessages(threadId, { before: threadMessages[0].id }),
+        await listMessages(threadId, { before: threadMessages[0].id, limit: THREAD_PAGE_SIZE }),
       );
-      set({ threadMessages: mergeThreadPage(threadMessages, data.items), loadingThread: false });
+      if (get().threadId !== threadId) return;
+      set({
+        threadMessages: mergeThreadPage(get().threadMessages, data.items),
+        threadHasOlder: pageMayHaveMore(data.items, THREAD_PAGE_SIZE),
+        loadingOlder: false,
+      });
     } catch (e) {
       logDebug('archive:older-error', e instanceof Error ? e.message : String(e));
-      set({ loadingThread: false });
+      set({ loadingOlder: false });
     }
   },
 
-  closeThread: () => set({ threadId: null, threadTitle: null, threadMessages: [] }),
+  loadNewer: async () => {
+    const { threadId, threadMessages, loadingThread, loadingNewer, threadHasNewer } = get();
+    if (!threadId || loadingThread || loadingNewer || !threadHasNewer || threadMessages.length === 0) return;
+    set({ loadingNewer: true });
+    try {
+      const data = ok<ConversationMessagesResponse>(
+        await listMessages(threadId, { after: threadMessages[threadMessages.length - 1].id, limit: THREAD_PAGE_SIZE }),
+      );
+      if (get().threadId !== threadId) return;
+      set({
+        threadMessages: mergeThreadPage(get().threadMessages, data.items),
+        threadHasNewer: pageMayHaveMore(data.items, THREAD_PAGE_SIZE),
+        loadingNewer: false,
+      });
+    } catch (e) {
+      logDebug('archive:newer-error', e instanceof Error ? e.message : String(e));
+      set({ loadingNewer: false });
+    }
+  },
+
+  closeThread: () =>
+    set({ threadId: null, threadTitle: null, threadMessages: [], loadingThread: false, ...closedThread() }),
 }));
+
+function closedThread() {
+  return { threadHasOlder: false, threadHasNewer: false, loadingOlder: false, loadingNewer: false };
+}

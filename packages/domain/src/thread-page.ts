@@ -27,6 +27,28 @@ export function compareChronological(a: ThreadMessage, b: ThreadMessage): number
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
+export interface ThreadWindowEnds {
+  hasOlder: boolean;
+  hasNewer: boolean;
+}
+
+/**
+ * Which ends of a freshly-opened window may hold more messages. Mirrors the server's `around` split:
+ * up to floor(limit/2) messages before the anchor, the remainder from the anchor on; a short side is exhausted.
+ */
+export function threadWindowEnds(items: readonly ThreadMessage[], limit: number, anchorId?: string): ThreadWindowEnds {
+  const full = items.length >= limit;
+  if (anchorId === undefined) return { hasOlder: full, hasNewer: false };
+  const anchorIndex = items.findIndex((m) => m.id === anchorId);
+  if (anchorIndex < 0) return { hasOlder: full, hasNewer: full };
+  return { hasOlder: anchorIndex >= Math.max(1, Math.floor(limit / 2)), hasNewer: full };
+}
+
+/** A `before`/`after` page shorter than the requested limit means that direction is exhausted. */
+export function pageMayHaveMore(page: readonly ThreadMessage[], limit: number): boolean {
+  return page.length >= limit;
+}
+
 /** Day-boundary label for a separator row, or null when the previous message is the same day. */
 export function dayBreakLabel(current: ThreadMessage, previous: ThreadMessage | undefined): string | null {
   const day = current.timestamp.slice(0, 10);

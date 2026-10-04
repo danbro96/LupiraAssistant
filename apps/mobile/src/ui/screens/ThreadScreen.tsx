@@ -1,5 +1,6 @@
 import { memo, useEffect } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator } from 'react-native-paper';
 import { useRoute, type RouteProp } from '@react-navigation/native';
 import { useArchive } from '../../state/archive-store';
@@ -8,33 +9,45 @@ import { dayBreakLabel } from '@lupira/assistant-domain/thread-page';
 import { radii, spacing, useColors, type Palette } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 
-// Chat-style reader. Rendered oldest→newest with `inverted` so paging older messages (the natural
-// direction here) doesn't jump the scroll position; the highlighted row is the search hit we jumped to.
+// The list mounts only once data is in: FlashList applies its initial position (the hit, else the bottom) once.
 
 type Styles = ReturnType<typeof makeStyles>;
 
 export function ThreadScreen() {
   const c = useColors();
   const styles = makeStyles(c);
+  const { height } = useWindowDimensions();
   const route = useRoute<RouteProp<RootStackParamList, 'Thread'>>();
   const { conversationId, aroundMessageId } = route.params;
 
-  const messages = useArchive((s) => s.threadMessages);
+  const data = useArchive((s) => s.threadMessages);
   const loading = useArchive((s) => s.loadingThread);
+  const loadingOlder = useArchive((s) => s.loadingOlder);
+  const loadingNewer = useArchive((s) => s.loadingNewer);
 
   useEffect(() => {
     void useArchive.getState().openThread(conversationId, aroundMessageId);
     return () => useArchive.getState().closeThread();
   }, [conversationId, aroundMessageId]);
 
-  // `inverted` needs newest-first data; the store keeps the window chronological.
-  const data = [...messages].reverse();
+  if (data.length === 0) {
+    return (
+      <View style={styles.screen}>
+        {loading ? (
+          <ActivityIndicator style={styles.spinner} />
+        ) : (
+          <Text style={styles.empty}>No messages in this thread.</Text>
+        )}
+      </View>
+    );
+  }
+
+  const hitIndex = aroundMessageId ? data.findIndex((m) => m.id === aroundMessageId) : -1;
 
   const renderItem = ({ item, index }: { item: ConversationMessageDto; index: number }) => (
     <MessageRow
       message={item}
-      // In inverted order the visually-preceding row is the next index.
-      previous={data[index + 1]}
+      previous={data[index - 1]}
       highlighted={item.id === aroundMessageId}
       styles={styles}
     />
@@ -42,23 +55,19 @@ export function ThreadScreen() {
 
   return (
     <View style={styles.screen}>
-      <FlatList
+      <FlashList
         data={data}
-        inverted
         keyExtractor={(m) => m.id}
         contentContainerStyle={styles.list}
-        onEndReachedThreshold={0.3}
-        onEndReached={() => void useArchive.getState().loadOlder()}
-        ListEmptyComponent={
-          loading ? (
-            <ActivityIndicator style={styles.spinner} />
-          ) : (
-            <Text style={styles.empty}>No messages in this thread.</Text>
-          )
-        }
-        ListFooterComponent={
-          loading && data.length > 0 ? <ActivityIndicator style={styles.spinner} /> : null
-        }
+        initialScrollIndex={hitIndex >= 0 ? hitIndex : undefined}
+        initialScrollIndexParams={hitIndex >= 0 ? { viewOffset: -height / 3 } : undefined}
+        maintainVisibleContentPosition={{ startRenderingFromBottom: true }}
+        onStartReachedThreshold={0.5}
+        onStartReached={() => void useArchive.getState().loadOlder()}
+        onEndReachedThreshold={0.5}
+        onEndReached={() => void useArchive.getState().loadNewer()}
+        ListHeaderComponent={loadingOlder ? <ActivityIndicator style={styles.spinner} /> : null}
+        ListFooterComponent={loadingNewer ? <ActivityIndicator style={styles.spinner} /> : null}
         renderItem={renderItem}
       />
     </View>
@@ -75,7 +84,7 @@ interface MessageRowProps {
 const MessageRow = memo(function MessageRow({ message, previous, highlighted, styles }: MessageRowProps) {
   const dayLabel = dayBreakLabel(message, previous);
   return (
-    <>
+    <View style={previous && styles.spaced}>
       {dayLabel ? <Text style={styles.dayBreak}>{dayLabel}</Text> : null}
       <View
         style={[
@@ -90,14 +99,15 @@ const MessageRow = memo(function MessageRow({ message, previous, highlighted, st
           {new Date(message.timestamp).toLocaleTimeString()}
         </Text>
       </View>
-    </>
+    </View>
   );
 });
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: c.bg },
-    list: { padding: spacing.lg, gap: spacing.sm },
+    list: { padding: spacing.lg },
+    spaced: { paddingTop: spacing.sm },
     bubble: { maxWidth: '85%', borderRadius: radii.lg, padding: spacing.sm, gap: 2 },
     mine: { alignSelf: 'flex-end', backgroundColor: c.primary },
     theirs: { alignSelf: 'flex-start', backgroundColor: c.surface },
