@@ -63,7 +63,6 @@ function TabLayout() {
         component={InboxScreen}
         options={{
           title: 'Inbox',
-          headerTitle: 'Lupira Assistant',
           tabBarIcon: ({ color, size }) => <MaterialIcons name={ICONS.email} size={size} color={color} />,
         }}
       />
@@ -72,7 +71,6 @@ function TabLayout() {
         component={ArchiveSearchScreen}
         options={{
           title: 'Archive',
-          headerTitle: 'Archive',
           tabBarIcon: ({ color, size }) => <MaterialIcons name={ICONS.search} size={size} color={color} />,
         }}
       />

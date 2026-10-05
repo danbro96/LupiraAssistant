@@ -1,8 +1,8 @@
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useLayoutEffect } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { ActivityIndicator } from 'react-native-paper';
-import { useRoute, type RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useArchive } from '../../state/archive-store';
 import type { ConversationMessageDto } from '../../data/api/generated/comms/models';
 import { dayBreakLabel } from '@lupira/assistant-domain/thread-page';
@@ -18,12 +18,18 @@ export function ThreadScreen() {
   const styles = makeStyles(c);
   const { height } = useWindowDimensions();
   const route = useRoute<RouteProp<RootStackParamList, 'Thread'>>();
+  const navigation = useNavigation();
   const { conversationId, aroundMessageId } = route.params;
 
   const data = useArchive((s) => s.threadMessages);
   const loading = useArchive((s) => s.loadingThread);
   const loadingOlder = useArchive((s) => s.loadingOlder);
   const loadingNewer = useArchive((s) => s.loadingNewer);
+  const threadTitle = useArchive((s) => s.threadTitle);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ title: threadTitle ?? 'Thread' });
+  }, [navigation, threadTitle]);
 
   useEffect(() => {
     void useArchive.getState().openThread(conversationId, aroundMessageId);
