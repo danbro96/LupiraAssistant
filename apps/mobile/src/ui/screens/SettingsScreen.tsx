@@ -12,6 +12,7 @@ import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { IdentityHeader } from '@danbro96/lupira-expo-paper/components/IdentityHeader';
+import { SignOutButton } from '@danbro96/lupira-expo-paper/components/SignOutButton';
 import { VersionLine } from '@danbro96/lupira-expo-diagnostics/VersionLine';
 import { spacing, type Palette, useColors } from '../theme';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
@@ -49,6 +50,9 @@ export function SettingsScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <IdentityHeader name={user?.name ?? user?.sub ?? 'Not signed in'} sub={user?.name ? user.sub : undefined} />
+
+      <List.Subheader>Account</List.Subheader>
+      <SignOutButton onSignOut={() => void useAuth.getState().clearSession()} />
 
       <List.Subheader>Assistant</List.Subheader>
       <Row label="Grant" value={grantStatus} styles={styles} />

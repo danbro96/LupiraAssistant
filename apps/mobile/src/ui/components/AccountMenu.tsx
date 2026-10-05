@@ -3,11 +3,5 @@ import { useAuth } from '../../state/auth-store';
 
 export function AccountMenu() {
   const user = useAuth((s) => s.user);
-  return (
-    <AccountButton
-      name={user?.name ?? user?.sub ?? 'Account'}
-      sub={user?.name ? user.sub : undefined}
-      onSignOut={() => void useAuth.getState().clearSession()}
-    />
-  );
+  return <AccountButton name={user?.name ?? user?.sub ?? 'Account'} />;
 }
