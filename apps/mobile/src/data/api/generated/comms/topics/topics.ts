@@ -8,41 +8,11 @@
 import type {
   GetTopicParams,
   ListTopicsParams,
-  ProblemDetails,
   TopicDetailDto,
   TopicSummaryDto
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type listTopicsResponse200 = {
-  data: TopicSummaryDto[]
-  status: 200
-}
-
-export type listTopicsResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type listTopicsResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type listTopicsResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type listTopicsResponseSuccess = (listTopicsResponse200) & {
-  headers: Headers;
-};
-export type listTopicsResponseError = (listTopicsResponse400 | listTopicsResponse401 | listTopicsResponse500) & {
-  headers: Headers;
-};
-
-export type listTopicsResponse = (listTopicsResponseSuccess | listTopicsResponseError)
 
 export const getListTopicsUrl = (params?: ListTopicsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -62,9 +32,9 @@ export const getListTopicsUrl = (params?: ListTopicsParams,) => {
 /**
  * @summary List topics by status (poll alternative to closed-topic push).
  */
-export const listTopics = async (params?: ListTopicsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listTopicsResponse> => {
+export const listTopics = async (params?: ListTopicsParams, options?: Parameters<typeof apiFetch>[1]): Promise<TopicSummaryDto[]> => {
 
-  return apiFetch<listTopicsResponse>(getListTopicsUrl(params),
+  return apiFetch<TopicSummaryDto[]>(getListTopicsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -73,40 +43,6 @@ export const listTopics = async (params?: ListTopicsParams, options?: Parameters
   }
 );}
 
-
-export type getTopicResponse200 = {
-  data: TopicDetailDto
-  status: 200
-}
-
-export type getTopicResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type getTopicResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type getTopicResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type getTopicResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type getTopicResponseSuccess = (getTopicResponse200) & {
-  headers: Headers;
-};
-export type getTopicResponseError = (getTopicResponse400 | getTopicResponse401 | getTopicResponse404 | getTopicResponse500) & {
-  headers: Headers;
-};
-
-export type getTopicResponse = (getTopicResponseSuccess | getTopicResponseError)
 
 export const getGetTopicUrl = (id: string,
     params?: GetTopicParams,) => {
@@ -128,9 +64,9 @@ export const getGetTopicUrl = (id: string,
  * @summary Get a topic with its ordered message window (open-topic tail).
  */
 export const getTopic = async (id: string,
-    params?: GetTopicParams, options?: Parameters<typeof apiFetch>[1]): Promise<getTopicResponse> => {
+    params?: GetTopicParams, options?: Parameters<typeof apiFetch>[1]): Promise<TopicDetailDto> => {
 
-  return apiFetch<getTopicResponse>(getGetTopicUrl(id,params),
+  return apiFetch<TopicDetailDto>(getGetTopicUrl(id,params),
   {
     ...options,
     method: 'GET'

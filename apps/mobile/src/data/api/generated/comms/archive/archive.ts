@@ -13,45 +13,10 @@ import type {
   ListConnectorsParams,
   ListConversationsParams,
   ListMessagesParams,
-  ProblemDetails,
   SearchParams
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type searchResponse200 = {
-  data: ArchiveSearchHitDto[]
-  status: 200
-}
-
-export type searchResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type searchResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type searchResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type searchResponse502 = {
-  data: ProblemDetails
-  status: 502
-}
-
-export type searchResponseSuccess = (searchResponse200) & {
-  headers: Headers;
-};
-export type searchResponseError = (searchResponse400 | searchResponse401 | searchResponse500 | searchResponse502) & {
-  headers: Headers;
-};
-
-export type searchResponse = (searchResponseSuccess | searchResponseError)
 
 export const getSearchUrl = (params?: SearchParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -71,9 +36,9 @@ export const getSearchUrl = (params?: SearchParams,) => {
 /**
  * @summary Hybrid research search over the corpus (semantic + full-text, reranked).
  */
-export const search = async (params?: SearchParams, options?: Parameters<typeof apiFetch>[1]): Promise<searchResponse> => {
+export const search = async (params?: SearchParams, options?: Parameters<typeof apiFetch>[1]): Promise<ArchiveSearchHitDto[]> => {
 
-  return apiFetch<searchResponse>(getSearchUrl(params),
+  return apiFetch<ArchiveSearchHitDto[]>(getSearchUrl(params),
   {
     ...options,
     method: 'GET'
@@ -82,35 +47,6 @@ export const search = async (params?: SearchParams, options?: Parameters<typeof 
   }
 );}
 
-
-export type listConnectorsResponse200 = {
-  data: ConnectorStatusDto[]
-  status: 200
-}
-
-export type listConnectorsResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type listConnectorsResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type listConnectorsResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type listConnectorsResponseSuccess = (listConnectorsResponse200) & {
-  headers: Headers;
-};
-export type listConnectorsResponseError = (listConnectorsResponse400 | listConnectorsResponse401 | listConnectorsResponse500) & {
-  headers: Headers;
-};
-
-export type listConnectorsResponse = (listConnectorsResponseSuccess | listConnectorsResponseError)
 
 export const getListConnectorsUrl = (params?: ListConnectorsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -130,9 +66,9 @@ export const getListConnectorsUrl = (params?: ListConnectorsParams,) => {
 /**
  * @summary Capture status per source: granted connectors, message count, last arrival.
  */
-export const listConnectors = async (params?: ListConnectorsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listConnectorsResponse> => {
+export const listConnectors = async (params?: ListConnectorsParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConnectorStatusDto[]> => {
 
-  return apiFetch<listConnectorsResponse>(getListConnectorsUrl(params),
+  return apiFetch<ConnectorStatusDto[]>(getListConnectorsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -141,35 +77,6 @@ export const listConnectors = async (params?: ListConnectorsParams, options?: Pa
   }
 );}
 
-
-export type listConversationsResponse200 = {
-  data: ConversationsResponse
-  status: 200
-}
-
-export type listConversationsResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type listConversationsResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type listConversationsResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type listConversationsResponseSuccess = (listConversationsResponse200) & {
-  headers: Headers;
-};
-export type listConversationsResponseError = (listConversationsResponse400 | listConversationsResponse401 | listConversationsResponse500) & {
-  headers: Headers;
-};
-
-export type listConversationsResponse = (listConversationsResponseSuccess | listConversationsResponseError)
 
 export const getListConversationsUrl = (params?: ListConversationsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -189,9 +96,9 @@ export const getListConversationsUrl = (params?: ListConversationsParams,) => {
 /**
  * @summary List conversations, newest activity first (title filter, cursor-paged).
  */
-export const listConversations = async (params?: ListConversationsParams, options?: Parameters<typeof apiFetch>[1]): Promise<listConversationsResponse> => {
+export const listConversations = async (params?: ListConversationsParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConversationsResponse> => {
 
-  return apiFetch<listConversationsResponse>(getListConversationsUrl(params),
+  return apiFetch<ConversationsResponse>(getListConversationsUrl(params),
   {
     ...options,
     method: 'GET'
@@ -200,40 +107,6 @@ export const listConversations = async (params?: ListConversationsParams, option
   }
 );}
 
-
-export type listMessagesResponse200 = {
-  data: ConversationMessagesResponse
-  status: 200
-}
-
-export type listMessagesResponse400 = {
-  data: ProblemDetails
-  status: 400
-}
-
-export type listMessagesResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type listMessagesResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type listMessagesResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type listMessagesResponseSuccess = (listMessagesResponse200) & {
-  headers: Headers;
-};
-export type listMessagesResponseError = (listMessagesResponse400 | listMessagesResponse401 | listMessagesResponse404 | listMessagesResponse500) & {
-  headers: Headers;
-};
-
-export type listMessagesResponse = (listMessagesResponseSuccess | listMessagesResponseError)
 
 export const getListMessagesUrl = (id: string,
     params?: ListMessagesParams,) => {
@@ -255,9 +128,9 @@ export const getListMessagesUrl = (id: string,
  * @summary A chat-style thread page: latest, before/after an anchor, or around one (search-hit jump).
  */
 export const listMessages = async (id: string,
-    params?: ListMessagesParams, options?: Parameters<typeof apiFetch>[1]): Promise<listMessagesResponse> => {
+    params?: ListMessagesParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConversationMessagesResponse> => {
 
-  return apiFetch<listMessagesResponse>(getListMessagesUrl(id,params),
+  return apiFetch<ConversationMessagesResponse>(getListMessagesUrl(id,params),
   {
     ...options,
     method: 'GET'

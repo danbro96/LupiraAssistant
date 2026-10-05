@@ -25,7 +25,7 @@ const Tabs = createBottomTabNavigator<TabParamList>();
 // Gated on sign-in: the sign-in screen until a session exists, then the tabs (Inbox / Archive)
 // with Settings and the detail screens pushed over them.
 export function RootStack() {
-  const authed = useAuth((s) => !!s.token && !!s.user);
+  const authed = useAuth((s) => s.isAuthenticated());
 
   return (
     <Stack.Navigator screenOptions={useStackScreenOptions()}>

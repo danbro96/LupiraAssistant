@@ -6,35 +6,10 @@
  * OpenAPI spec version: v1
  */
 import type {
-  ProblemDetails,
   RingIngestReceipt
 } from '../models';
 
 import { deviceKeyFetch } from '../../../mutators';
-
-export type ingestRingSamplesResponse202 = {
-  data: RingIngestReceipt
-  status: 202
-}
-
-export type ingestRingSamplesResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type ingestRingSamplesResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type ingestRingSamplesResponseSuccess = (ingestRingSamplesResponse202) & {
-  headers: Headers;
-};
-export type ingestRingSamplesResponseError = (ingestRingSamplesResponse401 | ingestRingSamplesResponse500) & {
-  headers: Headers;
-};
-
-export type ingestRingSamplesResponse = (ingestRingSamplesResponseSuccess | ingestRingSamplesResponseError)
 
 export const getIngestRingSamplesUrl = () => {
 
@@ -47,7 +22,7 @@ export const getIngestRingSamplesUrl = () => {
 /**
  * @summary Ingest a batch of ring point-samples (NDJSON).
  */
-export const ingestRingSamples = async (ingestRingSamplesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<ingestRingSamplesResponse> => {
+export const ingestRingSamples = async (ingestRingSamplesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<RingIngestReceipt> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -63,7 +38,7 @@ export const ingestRingSamples = async (ingestRingSamplesBody: string, options?:
     }
     return headers;
   };
-return deviceKeyFetch<ingestRingSamplesResponse>(getIngestRingSamplesUrl(),
+return deviceKeyFetch<RingIngestReceipt>(getIngestRingSamplesUrl(),
   {
     ...options,
     method: 'POST',
@@ -72,30 +47,6 @@ return deviceKeyFetch<ingestRingSamplesResponse>(getIngestRingSamplesUrl(),
   }
 );}
 
-
-export type ingestSummariesResponse202 = {
-  data: RingIngestReceipt
-  status: 202
-}
-
-export type ingestSummariesResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type ingestSummariesResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type ingestSummariesResponseSuccess = (ingestSummariesResponse202) & {
-  headers: Headers;
-};
-export type ingestSummariesResponseError = (ingestSummariesResponse401 | ingestSummariesResponse500) & {
-  headers: Headers;
-};
-
-export type ingestSummariesResponse = (ingestSummariesResponseSuccess | ingestSummariesResponseError)
 
 export const getIngestSummariesUrl = () => {
 
@@ -108,7 +59,7 @@ export const getIngestSummariesUrl = () => {
 /**
  * @summary Ingest a batch of device-computed summaries (NDJSON).
  */
-export const ingestSummaries = async (ingestSummariesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<ingestSummariesResponse> => {
+export const ingestSummaries = async (ingestSummariesBody: string, options?: Parameters<typeof deviceKeyFetch>[1]): Promise<RingIngestReceipt> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -124,7 +75,7 @@ export const ingestSummaries = async (ingestSummariesBody: string, options?: Par
     }
     return headers;
   };
-return deviceKeyFetch<ingestSummariesResponse>(getIngestSummariesUrl(),
+return deviceKeyFetch<RingIngestReceipt>(getIngestSummariesUrl(),
   {
     ...options,
     method: 'POST',

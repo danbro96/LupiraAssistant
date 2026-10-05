@@ -8,36 +8,11 @@
 import type {
   PreferencesResponse,
   PreferencesUpdateRequest,
-  ProblemDetails,
   ProfileResponse,
   RoutingUpdateRequest
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type getProfileResponse200 = {
-  data: ProfileResponse
-  status: 200
-}
-
-export type getProfileResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type getProfileResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type getProfileResponseSuccess = (getProfileResponse200) & {
-  headers: Headers;
-};
-export type getProfileResponseError = (getProfileResponse401 | getProfileResponse500) & {
-  headers: Headers;
-};
-
-export type getProfileResponse = (getProfileResponseSuccess | getProfileResponseError)
 
 export const getGetProfileUrl = () => {
 
@@ -50,9 +25,9 @@ export const getGetProfileUrl = () => {
 /**
  * @summary Get the caller's assistant profile (routing defaults).
  */
-export const getProfile = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getProfileResponse> => {
+export const getProfile = async ( options?: Parameters<typeof apiFetch>[1]): Promise<ProfileResponse> => {
 
-  return apiFetch<getProfileResponse>(getGetProfileUrl(),
+  return apiFetch<ProfileResponse>(getGetProfileUrl(),
   {
     ...options,
     method: 'GET'
@@ -61,30 +36,6 @@ export const getProfile = async ( options?: Parameters<typeof apiFetch>[1]): Pro
   }
 );}
 
-
-export type setProfileRoutingResponse200 = {
-  data: ProfileResponse
-  status: 200
-}
-
-export type setProfileRoutingResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type setProfileRoutingResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type setProfileRoutingResponseSuccess = (setProfileRoutingResponse200) & {
-  headers: Headers;
-};
-export type setProfileRoutingResponseError = (setProfileRoutingResponse401 | setProfileRoutingResponse500) & {
-  headers: Headers;
-};
-
-export type setProfileRoutingResponse = (setProfileRoutingResponseSuccess | setProfileRoutingResponseError)
 
 export const getSetProfileRoutingUrl = () => {
 
@@ -97,7 +48,7 @@ export const getSetProfileRoutingUrl = () => {
 /**
  * @summary Set routing defaults (calendar/list/address-book) the assistant writes to.
  */
-export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<setProfileRoutingResponse> => {
+export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<ProfileResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -113,7 +64,7 @@ export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateReque
     }
     return headers;
   };
-return apiFetch<setProfileRoutingResponse>(getSetProfileRoutingUrl(),
+return apiFetch<ProfileResponse>(getSetProfileRoutingUrl(),
   {
     ...options,
     method: 'PUT',
@@ -122,30 +73,6 @@ return apiFetch<setProfileRoutingResponse>(getSetProfileRoutingUrl(),
   }
 );}
 
-
-export type getPreferencesResponse200 = {
-  data: PreferencesResponse
-  status: 200
-}
-
-export type getPreferencesResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type getPreferencesResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type getPreferencesResponseSuccess = (getPreferencesResponse200) & {
-  headers: Headers;
-};
-export type getPreferencesResponseError = (getPreferencesResponse401 | getPreferencesResponse500) & {
-  headers: Headers;
-};
-
-export type getPreferencesResponse = (getPreferencesResponseSuccess | getPreferencesResponseError)
 
 export const getGetPreferencesUrl = () => {
 
@@ -158,9 +85,9 @@ export const getGetPreferencesUrl = () => {
 /**
  * @summary Get delivery preferences (per-item vs digest, quiet hours).
  */
-export const getPreferences = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getPreferencesResponse> => {
+export const getPreferences = async ( options?: Parameters<typeof apiFetch>[1]): Promise<PreferencesResponse> => {
 
-  return apiFetch<getPreferencesResponse>(getGetPreferencesUrl(),
+  return apiFetch<PreferencesResponse>(getGetPreferencesUrl(),
   {
     ...options,
     method: 'GET'
@@ -169,35 +96,6 @@ export const getPreferences = async ( options?: Parameters<typeof apiFetch>[1]):
   }
 );}
 
-
-export type setPreferencesResponse200 = {
-  data: PreferencesResponse
-  status: 200
-}
-
-export type setPreferencesResponse400 = {
-  data: string
-  status: 400
-}
-
-export type setPreferencesResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type setPreferencesResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type setPreferencesResponseSuccess = (setPreferencesResponse200) & {
-  headers: Headers;
-};
-export type setPreferencesResponseError = (setPreferencesResponse400 | setPreferencesResponse401 | setPreferencesResponse500) & {
-  headers: Headers;
-};
-
-export type setPreferencesResponse = (setPreferencesResponseSuccess | setPreferencesResponseError)
 
 export const getSetPreferencesUrl = () => {
 
@@ -210,7 +108,7 @@ export const getSetPreferencesUrl = () => {
 /**
  * @summary Set delivery preferences. Quiet hours suppress the push only — items still land in the inbox.
  */
-export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<setPreferencesResponse> => {
+export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<PreferencesResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -226,7 +124,7 @@ export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdate
     }
     return headers;
   };
-return apiFetch<setPreferencesResponse>(getSetPreferencesUrl(),
+return apiFetch<PreferencesResponse>(getSetPreferencesUrl(),
   {
     ...options,
     method: 'PUT',

@@ -6,18 +6,12 @@ import {
 } from '../data/api/generated/comms/archive/archive';
 import type {
   ArchiveSearchHitDto,
-  ConversationsResponse,
   ConversationSummaryDto,
-  ConversationMessagesResponse,
   ConversationMessageDto,
   MessageSource,
 } from '../data/api/generated/comms/models';
 import { mergeThreadPage, pageMayHaveMore, threadWindowEnds } from '@lupira/assistant-domain/thread-page';
 import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
-
-// The generated response types union success with ProblemDetails; a non-2xx already threw by the time
-// these resolve (see http.ts), so the success arm is the only reachable shape — narrow it here.
-const ok = <T,>(res: { data: unknown }): T => res.data as T;
 
 export const THREAD_PAGE_SIZE = 30;
 
@@ -91,7 +85,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
         from: filters.from,
         to: filters.to,
       });
-      set({ hits: ok<ArchiveSearchHitDto[]>(res), searching: false });
+      set({ hits: res, searching: false });
     } catch (e) {
       logDebug('archive:search-error', e instanceof Error ? e.message : String(e));
       set({ searching: false, searchError: 'Search unavailable.', hits: [] });
@@ -105,7 +99,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
     set({ loadingConversations: true });
     try {
       const cursor = opts.more ? (get().conversationsCursor ?? undefined) : undefined;
-      const data = ok<ConversationsResponse>(await listConversations({ cursor, q: opts.q }));
+      const data = await listConversations({ cursor, q: opts.q });
       const page = data.items;
       set({
         conversations: opts.more ? [...get().conversations, ...page] : page,
@@ -121,9 +115,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
   openThread: async (conversationId, aroundMessageId) => {
     set({ threadId: conversationId, threadMessages: [], threadTitle: null, loadingThread: true, ...closedThread() });
     try {
-      const data = ok<ConversationMessagesResponse>(
-        await listMessages(conversationId, { around: aroundMessageId, limit: THREAD_PAGE_SIZE }),
-      );
+      const data = await listMessages(conversationId, { around: aroundMessageId, limit: THREAD_PAGE_SIZE });
       if (get().threadId !== conversationId) return;
       const ends = threadWindowEnds(data.items, THREAD_PAGE_SIZE, aroundMessageId);
       set({
@@ -144,9 +136,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
     if (!threadId || loadingThread || loadingOlder || !threadHasOlder || threadMessages.length === 0) return;
     set({ loadingOlder: true });
     try {
-      const data = ok<ConversationMessagesResponse>(
-        await listMessages(threadId, { before: threadMessages[0].id, limit: THREAD_PAGE_SIZE }),
-      );
+      const data = await listMessages(threadId, { before: threadMessages[0].id, limit: THREAD_PAGE_SIZE });
       if (get().threadId !== threadId) return;
       set({
         threadMessages: mergeThreadPage(get().threadMessages, data.items),
@@ -164,9 +154,7 @@ export const useArchive = create<ArchiveState & ArchiveActions>((set, get) => ({
     if (!threadId || loadingThread || loadingNewer || !threadHasNewer || threadMessages.length === 0) return;
     set({ loadingNewer: true });
     try {
-      const data = ok<ConversationMessagesResponse>(
-        await listMessages(threadId, { after: threadMessages[threadMessages.length - 1].id, limit: THREAD_PAGE_SIZE }),
-      );
+      const data = await listMessages(threadId, { after: threadMessages[threadMessages.length - 1].id, limit: THREAD_PAGE_SIZE });
       if (get().threadId !== threadId) return;
       set({
         threadMessages: mergeThreadPage(get().threadMessages, data.items),

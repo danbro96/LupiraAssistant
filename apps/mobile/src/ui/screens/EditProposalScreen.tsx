@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Switch, Text } from 'react-native-paper';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { useInbox } from '../../state/inbox-store';
+import { resolveItem, useInboxItems } from '../../state/inbox';
 import {
   applyEdit,
   editSpecFor,
@@ -29,7 +29,7 @@ export function EditProposalScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, 'EditProposal'>>();
 
-  const item = useInbox((s) => s.items.find((i) => i.id === route.params.itemId));
+  const item = useInboxItems().find((i) => i.id === route.params.itemId);
   const slot = item?.proposal ? payloadSlotFor(item.proposal.actionKind) : null;
   const spec = item?.proposal ? editSpecFor(item.proposal.actionKind) : null;
   const initial = (slot && item?.proposal?.[slot]) || null;
@@ -72,7 +72,7 @@ export function EditProposalScreen() {
     setErrors(errs);
     if (Object.keys(errs).length > 0 || !slot) return;
 
-    void useInbox.getState().resolve(item!.id, { action: 'Edit', edits: { [slot]: next } });
+    void resolveItem(item!.id, { action: 'Edit', edits: { [slot]: next } });
     toast('Edit queued.');
     navigation.goBack();
   }

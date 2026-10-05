@@ -6,40 +6,10 @@
  * OpenAPI spec version: v1
  */
 import type {
-  ProblemDetails,
   RegisterPushTokenRequest
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type createPushTokenResponse204 = {
-  data: void
-  status: 204
-}
-
-export type createPushTokenResponse400 = {
-  data: string
-  status: 400
-}
-
-export type createPushTokenResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type createPushTokenResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type createPushTokenResponseSuccess = (createPushTokenResponse204) & {
-  headers: Headers;
-};
-export type createPushTokenResponseError = (createPushTokenResponse400 | createPushTokenResponse401 | createPushTokenResponse500) & {
-  headers: Headers;
-};
-
-export type createPushTokenResponse = (createPushTokenResponseSuccess | createPushTokenResponseError)
 
 export const getCreatePushTokenUrl = () => {
 
@@ -52,7 +22,7 @@ export const getCreatePushTokenUrl = () => {
 /**
  * @summary Register this device's Expo push token (idempotent on the token).
  */
-export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: Parameters<typeof apiFetch>[1]): Promise<createPushTokenResponse> => {
+export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -68,7 +38,7 @@ export const createPushToken = async (registerPushTokenRequest: RegisterPushToke
     }
     return headers;
   };
-return apiFetch<createPushTokenResponse>(getCreatePushTokenUrl(),
+return apiFetch<void>(getCreatePushTokenUrl(),
   {
     ...options,
     method: 'POST',
@@ -77,35 +47,6 @@ return apiFetch<createPushTokenResponse>(getCreatePushTokenUrl(),
   }
 );}
 
-
-export type deletePushTokenResponse204 = {
-  data: void
-  status: 204
-}
-
-export type deletePushTokenResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type deletePushTokenResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type deletePushTokenResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type deletePushTokenResponseSuccess = (deletePushTokenResponse204) & {
-  headers: Headers;
-};
-export type deletePushTokenResponseError = (deletePushTokenResponse401 | deletePushTokenResponse404 | deletePushTokenResponse500) & {
-  headers: Headers;
-};
-
-export type deletePushTokenResponse = (deletePushTokenResponseSuccess | deletePushTokenResponseError)
 
 export const getDeletePushTokenUrl = (token: string,) => {
 
@@ -118,9 +59,9 @@ export const getDeletePushTokenUrl = (token: string,) => {
 /**
  * @summary Drop a push token (logout).
  */
-export const deletePushToken = async (token: string, options?: Parameters<typeof apiFetch>[1]): Promise<deletePushTokenResponse> => {
+export const deletePushToken = async (token: string, options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
 
-  return apiFetch<deletePushTokenResponse>(getDeletePushTokenUrl(token),
+  return apiFetch<void>(getDeletePushTokenUrl(token),
   {
     ...options,
     method: 'DELETE'

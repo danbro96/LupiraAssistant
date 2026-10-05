@@ -1,6 +1,5 @@
 import * as WebBrowser from 'expo-web-browser';
 import { OIDC_SCHEME } from './oidc-config';
-import { joinUrl } from '../api/http';
 import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Launches assistant-api's hosted offline-grant enrollment. The hub (a confidential Authentik client)
@@ -15,7 +14,7 @@ export const CONNECT_RETURN_URL = `${OIDC_SCHEME}://connected`;
 // (Auth:Offline:AllowedReturnUris); /auth/done 302s back to it when the grant is captured.
 function connectUrl(apiUrl: string): string {
   const ret = encodeURIComponent(CONNECT_RETURN_URL);
-  return `${joinUrl(apiUrl, '/api/auth/login')}?return_uri=${ret}`;
+  return `${apiUrl.replace(/\/$/, '')}/api/auth/login?return_uri=${ret}`;
 }
 
 export type ConnectResult = 'returned' | 'dismissed';

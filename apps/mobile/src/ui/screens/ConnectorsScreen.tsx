@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ActivityIndicator } from 'react-native-paper';
-import { useSettings } from '../../state/settings-store';
+import { useConnectors } from '../../state/settings';
 import type { ConnectorStatusDto } from '../../data/api/generated/comms/models';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 
@@ -14,12 +13,7 @@ export function ConnectorsScreen() {
   const c = useColors();
   const styles = makeStyles(c);
 
-  const connectors = useSettings((s) => s.connectors);
-  const loading = useSettings((s) => s.loadingConnectors);
-
-  useEffect(() => {
-    void useSettings.getState().loadConnectors();
-  }, []);
+  const { data: connectors = [], isFetching: loading, refetch } = useConnectors();
 
   return (
     <ScrollView
@@ -28,7 +22,7 @@ export function ConnectorsScreen() {
       refreshControl={
         <RefreshControl
           refreshing={loading && connectors.length > 0}
-          onRefresh={() => void useSettings.getState().loadConnectors()}
+          onRefresh={() => void refetch()}
           tintColor={c.primary}
         />
       }

@@ -3,7 +3,7 @@ import { SCHEMA_SQL } from './schema';
 
 // Per-JS-context singleton: the headless background task opens its own connection to the same file; WAL + busy_timeout serialize the writers.
 
-const DB_NAME = 'lupira-assistant.db';
+export const DB_NAME = 'lupira-assistant.db';
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export type Db = SQLite.SQLiteDatabase;

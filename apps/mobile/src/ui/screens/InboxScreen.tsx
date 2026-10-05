@@ -2,7 +2,16 @@ import { memo, useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useInbox, type GrantStatus } from '../../state/inbox-store';
+import {
+  answerItem,
+  markItemRead,
+  refreshGrant,
+  resolveItem,
+  useGrantStatus,
+  useInboxItems,
+  type GrantStatus,
+} from '../../state/inbox';
+import { syncNow } from '../../state/sync-status';
 import { useAuth } from '../../state/auth-store';
 import { launchConnect } from '../../data/auth/connect';
 import type { InboxItemView } from '@lupira/assistant-domain/inbox-item';
@@ -25,8 +34,8 @@ export function InboxScreen() {
   const c = useColors();
   const styles = makeStyles(c);
 
-  const items = useInbox((s) => s.items);
-  const grantStatus = useInbox((s) => s.grantStatus);
+  const items = useInboxItems();
+  const grantStatus = useGrantStatus();
   const apiUrl = useAuth((s) => s.apiUrl);
   const [refreshing, setRefreshing] = useState(false);
   const [connecting, setConnecting] = useState(false);
@@ -35,21 +44,20 @@ export function InboxScreen() {
 
   async function onRefresh() {
     setRefreshing(true);
-    await useInbox.getState().refresh();
+    await syncNow();
     setRefreshing(false);
   }
 
   // Pull-on-open freshness (until push lands): the cached feed renders instantly, then updates.
   useEffect(() => {
-    void useInbox.getState().refresh();
-    void useInbox.getState().refreshGrant();
+    void syncNow();
   }, []);
 
   async function onConnect() {
     setConnecting(true);
     const res = await launchConnect(apiUrl);
     if (res === 'returned') {
-      await useInbox.getState().refreshGrant();
+      await refreshGrant();
       toast('Assistant connection updated.');
     }
     setConnecting(false);
@@ -123,7 +131,7 @@ const ProposalCard = memo(function ProposalCard({ item, styles }: { item: InboxI
       <View style={styles.actions}>
         <Button
           title="Approve"
-          onPress={() => void useInbox.getState().resolve(item.id, { action: 'Approve' })}
+          onPress={() => void resolveItem(item.id, { action: 'Approve' })}
           style={styles.actionBtn}
         />
         {editable ? (
@@ -137,7 +145,7 @@ const ProposalCard = memo(function ProposalCard({ item, styles }: { item: InboxI
         <Button
           title="Dismiss"
           variant="destructive"
-          onPress={() => void useInbox.getState().resolve(item.id, { action: 'Dismiss' })}
+          onPress={() => void resolveItem(item.id, { action: 'Dismiss' })}
           style={styles.actionBtn}
         />
       </View>
@@ -153,7 +161,7 @@ const NoticeCard = memo(function NoticeCard({ item, styles }: { item: InboxItemV
         <Button
           title="Got it"
           variant="secondary"
-          onPress={() => void useInbox.getState().markRead(item.id)}
+          onPress={() => void markItemRead(item.id)}
           style={styles.actionBtn}
         />
       </View>
@@ -182,13 +190,13 @@ const QuestionCard = memo(function QuestionCard({ item, answer, onAnswerChange, 
         <Button
           title="Answer"
           disabled={answer.trim().length === 0}
-          onPress={() => void useInbox.getState().answer(item.id, { answer: answer.trim() })}
+          onPress={() => void answerItem(item.id, { answer: answer.trim() })}
           style={styles.actionBtn}
         />
         <Button
           title="Skip"
           variant="secondary"
-          onPress={() => void useInbox.getState().answer(item.id, { skip: true })}
+          onPress={() => void answerItem(item.id, { skip: true })}
           style={styles.actionBtn}
         />
       </View>

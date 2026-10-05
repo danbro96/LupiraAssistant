@@ -7,35 +7,10 @@
  */
 import type {
   HealthRecordDto,
-  MeDto,
-  ProblemDetails
+  MeDto
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type whoAmIResponse200 = {
-  data: MeDto
-  status: 200
-}
-
-export type whoAmIResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type whoAmIResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type whoAmIResponseSuccess = (whoAmIResponse200) & {
-  headers: Headers;
-};
-export type whoAmIResponseError = (whoAmIResponse401 | whoAmIResponse500) & {
-  headers: Headers;
-};
-
-export type whoAmIResponse = (whoAmIResponseSuccess | whoAmIResponseError)
 
 export const getWhoAmIUrl = () => {
 
@@ -48,9 +23,9 @@ export const getWhoAmIUrl = () => {
 /**
  * @summary The caller's resolved local identity (JIT-provisioned on first login).
  */
-export const whoAmI = async ( options?: Parameters<typeof apiFetch>[1]): Promise<whoAmIResponse> => {
+export const whoAmI = async ( options?: Parameters<typeof apiFetch>[1]): Promise<MeDto> => {
 
-  return apiFetch<whoAmIResponse>(getWhoAmIUrl(),
+  return apiFetch<MeDto>(getWhoAmIUrl(),
   {
     ...options,
     method: 'GET'
@@ -59,30 +34,6 @@ export const whoAmI = async ( options?: Parameters<typeof apiFetch>[1]): Promise
   }
 );}
 
-
-export type bootstrapMeResponse200 = {
-  data: HealthRecordDto
-  status: 200
-}
-
-export type bootstrapMeResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type bootstrapMeResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type bootstrapMeResponseSuccess = (bootstrapMeResponse200) & {
-  headers: Headers;
-};
-export type bootstrapMeResponseError = (bootstrapMeResponse401 | bootstrapMeResponse500) & {
-  headers: Headers;
-};
-
-export type bootstrapMeResponse = (bootstrapMeResponseSuccess | bootstrapMeResponseError)
 
 export const getBootstrapMeUrl = () => {
 
@@ -95,9 +46,9 @@ export const getBootstrapMeUrl = () => {
 /**
  * @summary Idempotently ensure the caller has a personal health record; returns it.
  */
-export const bootstrapMe = async ( options?: Parameters<typeof apiFetch>[1]): Promise<bootstrapMeResponse> => {
+export const bootstrapMe = async ( options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto> => {
 
-  return apiFetch<bootstrapMeResponse>(getBootstrapMeUrl(),
+  return apiFetch<HealthRecordDto>(getBootstrapMeUrl(),
   {
     ...options,
     method: 'POST'

@@ -5,8 +5,8 @@ export function AccountMenu() {
   const user = useAuth((s) => s.user);
   return (
     <AccountButton
-      name={user?.displayName ?? user?.sub ?? 'Account'}
-      sub={user?.displayName ? user.sub : undefined}
+      name={user?.name ?? user?.sub ?? 'Account'}
+      sub={user?.name ? user.sub : undefined}
       onSignOut={() => void useAuth.getState().clearSession()}
     />
   );

@@ -1,10 +1,9 @@
+import type { AuthPort } from '@danbro96/lupira-http/authPort';
+
 // Dependency-inversion seams so the data layer reads the live token/key/base URL without importing the state layer.
 
-export interface OidcAuthPort {
-  getApiUrl: () => string;
+export interface OidcAuthPort extends AuthPort {
   getAuthMode: () => 'oidc' | 'dev';
-  getToken: () => string | null;
-  refresh: (force?: boolean, sentToken?: string) => Promise<string | null>;
 }
 
 export interface DeviceKeyPort {

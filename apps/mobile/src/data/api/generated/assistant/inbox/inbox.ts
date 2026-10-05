@@ -10,41 +10,11 @@ import type {
   AnswerCheckInRequest,
   GetInboxParams,
   InboxResponse,
-  ProblemDetails,
   ReadNoticeRequest,
   ResolveProposalRequest
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type getInboxResponse200 = {
-  data: InboxResponse
-  status: 200
-}
-
-export type getInboxResponse400 = {
-  data: string
-  status: 400
-}
-
-export type getInboxResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type getInboxResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type getInboxResponseSuccess = (getInboxResponse200) & {
-  headers: Headers;
-};
-export type getInboxResponseError = (getInboxResponse400 | getInboxResponse401 | getInboxResponse500) & {
-  headers: Headers;
-};
-
-export type getInboxResponse = (getInboxResponseSuccess | getInboxResponseError)
 
 export const getGetInboxUrl = (params?: GetInboxParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -64,9 +34,9 @@ export const getGetInboxUrl = (params?: GetInboxParams,) => {
 /**
  * @summary The caller's feed: pending approvals + open questions (default), or resolved history.
  */
-export const getInbox = async (params?: GetInboxParams, options?: Parameters<typeof apiFetch>[1]): Promise<getInboxResponse> => {
+export const getInbox = async (params?: GetInboxParams, options?: Parameters<typeof apiFetch>[1]): Promise<InboxResponse> => {
 
-  return apiFetch<getInboxResponse>(getGetInboxUrl(params),
+  return apiFetch<InboxResponse>(getGetInboxUrl(params),
   {
     ...options,
     method: 'GET'
@@ -75,45 +45,6 @@ export const getInbox = async (params?: GetInboxParams, options?: Parameters<typ
   }
 );}
 
-
-export type resolveProposalResponse200 = {
-  data: AckResponse
-  status: 200
-}
-
-export type resolveProposalResponse400 = {
-  data: string
-  status: 400
-}
-
-export type resolveProposalResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type resolveProposalResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type resolveProposalResponse409 = {
-  data: ProblemDetails
-  status: 409
-}
-
-export type resolveProposalResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type resolveProposalResponseSuccess = (resolveProposalResponse200) & {
-  headers: Headers;
-};
-export type resolveProposalResponseError = (resolveProposalResponse400 | resolveProposalResponse401 | resolveProposalResponse404 | resolveProposalResponse409 | resolveProposalResponse500) & {
-  headers: Headers;
-};
-
-export type resolveProposalResponse = (resolveProposalResponseSuccess | resolveProposalResponseError)
 
 export const getResolveProposalUrl = (id: string,) => {
 
@@ -127,7 +58,7 @@ export const getResolveProposalUrl = (id: string,) => {
  * @summary Approve, edit, or dismiss a pending proposal. Idempotent on clientActionId.
  */
 export const resolveProposal = async (id: string,
-    resolveProposalRequest: ResolveProposalRequest, options?: Parameters<typeof apiFetch>[1]): Promise<resolveProposalResponse> => {
+    resolveProposalRequest: ResolveProposalRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -143,7 +74,7 @@ export const resolveProposal = async (id: string,
     }
     return headers;
   };
-return apiFetch<resolveProposalResponse>(getResolveProposalUrl(id),
+return apiFetch<AckResponse>(getResolveProposalUrl(id),
   {
     ...options,
     method: 'POST',
@@ -152,45 +83,6 @@ return apiFetch<resolveProposalResponse>(getResolveProposalUrl(id),
   }
 );}
 
-
-export type answerCheckInResponse200 = {
-  data: AckResponse
-  status: 200
-}
-
-export type answerCheckInResponse400 = {
-  data: string
-  status: 400
-}
-
-export type answerCheckInResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type answerCheckInResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type answerCheckInResponse409 = {
-  data: ProblemDetails
-  status: 409
-}
-
-export type answerCheckInResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type answerCheckInResponseSuccess = (answerCheckInResponse200) & {
-  headers: Headers;
-};
-export type answerCheckInResponseError = (answerCheckInResponse400 | answerCheckInResponse401 | answerCheckInResponse404 | answerCheckInResponse409 | answerCheckInResponse500) & {
-  headers: Headers;
-};
-
-export type answerCheckInResponse = (answerCheckInResponseSuccess | answerCheckInResponseError)
 
 export const getAnswerCheckInUrl = (id: string,) => {
 
@@ -204,7 +96,7 @@ export const getAnswerCheckInUrl = (id: string,) => {
  * @summary Answer or skip an open question. Idempotent on clientActionId.
  */
 export const answerCheckIn = async (id: string,
-    answerCheckInRequest: AnswerCheckInRequest, options?: Parameters<typeof apiFetch>[1]): Promise<answerCheckInResponse> => {
+    answerCheckInRequest: AnswerCheckInRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -220,7 +112,7 @@ export const answerCheckIn = async (id: string,
     }
     return headers;
   };
-return apiFetch<answerCheckInResponse>(getAnswerCheckInUrl(id),
+return apiFetch<AckResponse>(getAnswerCheckInUrl(id),
   {
     ...options,
     method: 'POST',
@@ -229,45 +121,6 @@ return apiFetch<answerCheckInResponse>(getAnswerCheckInUrl(id),
   }
 );}
 
-
-export type markNoticeReadResponse200 = {
-  data: AckResponse
-  status: 200
-}
-
-export type markNoticeReadResponse400 = {
-  data: string
-  status: 400
-}
-
-export type markNoticeReadResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type markNoticeReadResponse404 = {
-  data: ProblemDetails
-  status: 404
-}
-
-export type markNoticeReadResponse409 = {
-  data: ProblemDetails
-  status: 409
-}
-
-export type markNoticeReadResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type markNoticeReadResponseSuccess = (markNoticeReadResponse200) & {
-  headers: Headers;
-};
-export type markNoticeReadResponseError = (markNoticeReadResponse400 | markNoticeReadResponse401 | markNoticeReadResponse404 | markNoticeReadResponse409 | markNoticeReadResponse500) & {
-  headers: Headers;
-};
-
-export type markNoticeReadResponse = (markNoticeReadResponseSuccess | markNoticeReadResponseError)
 
 export const getMarkNoticeReadUrl = (id: string,) => {
 
@@ -281,7 +134,7 @@ export const getMarkNoticeReadUrl = (id: string,) => {
  * @summary Mark a notice read. Idempotent on clientActionId.
  */
 export const markNoticeRead = async (id: string,
-    readNoticeRequest: ReadNoticeRequest, options?: Parameters<typeof apiFetch>[1]): Promise<markNoticeReadResponse> => {
+    readNoticeRequest: ReadNoticeRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -297,7 +150,7 @@ export const markNoticeRead = async (id: string,
     }
     return headers;
   };
-return apiFetch<markNoticeReadResponse>(getMarkNoticeReadUrl(id),
+return apiFetch<AckResponse>(getMarkNoticeReadUrl(id),
   {
     ...options,
     method: 'POST',

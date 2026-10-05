@@ -7,35 +7,10 @@
  */
 import type {
   CreateHealthRecordRequest,
-  HealthRecordDto,
-  ProblemDetails
+  HealthRecordDto
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type listRecordsResponse200 = {
-  data: HealthRecordDto[]
-  status: 200
-}
-
-export type listRecordsResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type listRecordsResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type listRecordsResponseSuccess = (listRecordsResponse200) & {
-  headers: Headers;
-};
-export type listRecordsResponseError = (listRecordsResponse401 | listRecordsResponse500) & {
-  headers: Headers;
-};
-
-export type listRecordsResponse = (listRecordsResponseSuccess | listRecordsResponseError)
 
 export const getListRecordsUrl = () => {
 
@@ -48,9 +23,9 @@ export const getListRecordsUrl = () => {
 /**
  * @summary List the health records the caller owns.
  */
-export const listRecords = async ( options?: Parameters<typeof apiFetch>[1]): Promise<listRecordsResponse> => {
+export const listRecords = async ( options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto[]> => {
 
-  return apiFetch<listRecordsResponse>(getListRecordsUrl(),
+  return apiFetch<HealthRecordDto[]>(getListRecordsUrl(),
   {
     ...options,
     method: 'GET'
@@ -59,30 +34,6 @@ export const listRecords = async ( options?: Parameters<typeof apiFetch>[1]): Pr
   }
 );}
 
-
-export type createRecordResponse200 = {
-  data: HealthRecordDto
-  status: 200
-}
-
-export type createRecordResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type createRecordResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type createRecordResponseSuccess = (createRecordResponse200) & {
-  headers: Headers;
-};
-export type createRecordResponseError = (createRecordResponse401 | createRecordResponse500) & {
-  headers: Headers;
-};
-
-export type createRecordResponse = (createRecordResponseSuccess | createRecordResponseError)
 
 export const getCreateRecordUrl = () => {
 
@@ -95,7 +46,7 @@ export const getCreateRecordUrl = () => {
 /**
  * @summary Create a health record (the caller becomes its owner).
  */
-export const createRecord = async (createHealthRecordRequest: CreateHealthRecordRequest, options?: Parameters<typeof apiFetch>[1]): Promise<createRecordResponse> => {
+export const createRecord = async (createHealthRecordRequest: CreateHealthRecordRequest, options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -111,7 +62,7 @@ export const createRecord = async (createHealthRecordRequest: CreateHealthRecord
     }
     return headers;
   };
-return apiFetch<createRecordResponse>(getCreateRecordUrl(),
+return apiFetch<HealthRecordDto>(getCreateRecordUrl(),
   {
     ...options,
     method: 'POST',

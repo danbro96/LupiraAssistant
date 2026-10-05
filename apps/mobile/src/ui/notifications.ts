@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { routeNotice, type NoticeData } from './navigation/notification-routing';
-import { useInbox } from '../state/inbox-store';
+import { syncNow } from '../state/sync-status';
 
 // Foreground presentation + tap routing, wired once at the root. A notice is only ever a wake signal:
 // on arrival we refresh the inbox so the real item (fetched from the hub) is already there when the
@@ -18,11 +18,11 @@ Notifications.setNotificationHandler({
 /** Subscribe to arrival + tap; returns an unsubscribe. Call once from App.tsx. */
 export function startNotificationHandling(): () => void {
   const received = Notifications.addNotificationReceivedListener(() => {
-    void useInbox.getState().refresh();
+    void syncNow();
   });
 
   const tapped = Notifications.addNotificationResponseReceivedListener((response) => {
-    void useInbox.getState().refresh();
+    void syncNow();
     routeNotice(response.notification.request.content.data as NoticeData | undefined);
   });
 

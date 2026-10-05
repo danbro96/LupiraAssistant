@@ -1,8 +1,8 @@
 import { defineConfig } from 'orval';
 
 /**
- * Raw typed fetchers (no react-query): the sync layer calls these from headless background tasks, and
- * the UI reads the SQLite mirror — a second, mirror-unaware cache would only fight it.
+ * Raw typed fetchers resolving to the body (no react-query hooks): the sync engine calls these from the
+ * headless background task, and the app owns its query keys.
  *
  * Every target rides the BFF origin; `baseUrl` is the prefix the BFF mounts that upstream at. HealthApi
  * is split in two because it serves two auth schemes: the `Ingest` tags use the device key and sit at the
@@ -16,7 +16,10 @@ const output = (dir: string, mutator: string, baseUrl = '') => ({
   mode: 'tags-split' as const,
   baseUrl,
   clean: true,
-  override: { mutator: { path: './src/data/api/mutators.ts', name: mutator } },
+  override: {
+    mutator: { path: './src/data/api/mutators.ts', name: mutator },
+    fetch: { includeHttpResponseReturnType: false },
+  },
 });
 
 export default defineConfig({

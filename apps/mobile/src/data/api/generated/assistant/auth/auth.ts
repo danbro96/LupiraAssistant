@@ -6,35 +6,10 @@
  * OpenAPI spec version: v1
  */
 import type {
-  AuthStatusResponse,
-  ProblemDetails
+  AuthStatusResponse
 } from '../models';
 
 import { apiFetch } from '../../../mutators';
-
-export type getAuthStatusResponse200 = {
-  data: AuthStatusResponse
-  status: 200
-}
-
-export type getAuthStatusResponse401 = {
-  data: ProblemDetails
-  status: 401
-}
-
-export type getAuthStatusResponse500 = {
-  data: ProblemDetails
-  status: 500
-}
-
-export type getAuthStatusResponseSuccess = (getAuthStatusResponse200) & {
-  headers: Headers;
-};
-export type getAuthStatusResponseError = (getAuthStatusResponse401 | getAuthStatusResponse500) & {
-  headers: Headers;
-};
-
-export type getAuthStatusResponse = (getAuthStatusResponseSuccess | getAuthStatusResponseError)
 
 export const getGetAuthStatusUrl = () => {
 
@@ -47,9 +22,9 @@ export const getGetAuthStatusUrl = () => {
 /**
  * @summary Whether the caller has a live offline grant (and for which audiences).
  */
-export const getAuthStatus = async ( options?: Parameters<typeof apiFetch>[1]): Promise<getAuthStatusResponse> => {
+export const getAuthStatus = async ( options?: Parameters<typeof apiFetch>[1]): Promise<AuthStatusResponse> => {
 
-  return apiFetch<getAuthStatusResponse>(getGetAuthStatusUrl(),
+  return apiFetch<AuthStatusResponse>(getGetAuthStatusUrl(),
   {
     ...options,
     method: 'GET'

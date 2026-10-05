@@ -37,7 +37,7 @@ function serve(_id: string, params: ListMessagesParams) {
   } else {
     items = thread.slice(-limit);
   }
-  return Promise.resolve({ status: 200, data: { conversationId: 'c1', title: 'T', items } });
+  return Promise.resolve({ conversationId: 'c1', title: 'T', items });
 }
 
 const ids = () => useArchive.getState().threadMessages.map((m) => m.id);

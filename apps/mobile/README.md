@@ -61,11 +61,13 @@ The iOS bundle id / Android package (`com.lupira.assistant`) and `scheme` (`lupi
 Authentik OIDC (PKCE public client); the session lives in the OS secure keystore.
 
 ### Store-and-forward acks
-- Inbox gestures (resolve / answer / read) are written to a SQLite `pending_acks` queue with a
-  **crash-safe, per-stream monotonic `seq`** (assigned atomically in the same transaction as the insert).
-- The queue drains in seq order; the hub dedups on `clientActionId`, so retries are always safe.
-  Accepted and permanently rejected rows are deleted; the first transient failure stops the drain.
-- Triggered on connectivity regained, app foreground, and a periodic `expo-background-task`.
+- The inbox is one doc in the `@danbro96/lupira-sync-engine` kernel (`sync/inbox-module.ts`); each gesture
+  (resolve / answer / read) is an op in the kernel outbox, written in the same transaction that hides its item.
+- Ops replay in order per item with `Idempotency-Key` = `clientActionId`, which the hub dedups on. Transient
+  failures back off and retry; a rejected gesture is parked (its item stays hidden) and shows in the
+  Developer screen's sync state.
+- A sync pushes queued acks, then refetches the inbox. Triggered on connectivity regained, app foreground,
+  sign-in, pull-to-refresh, push notices and a periodic `expo-background-task`.
 
 ---
 
@@ -74,23 +76,24 @@ Authentik OIDC (PKCE public client); the session lives in the OS secure keystore
 ```
 src/
   domain/      pure constants and types: API error timeout, seq stream
-  data/        expo-sqlite repos (seq, inbox cache, pending acks), HTTP core, OIDC auth ports,
+  data/        expo-sqlite repos (seq, health ingest buffers), mutators, auth ports,
                generated API clients (orval — never hand-edited), push registration
-  sync/        ack uploader, single-flight sync-engine + triggers, background-upload task,
-               the UI-facing sync-status store
-  state/       Zustand: auth (OIDC), inbox (feed + grant), archive (conversations/threads/search),
-               settings
+  sync/        the sync engine and its inbox module, the query client
+  state/       auth (createAuthStore), the background sync task, inbox and settings hooks (React Query),
+               sync status, Zustand archive (conversations/threads/search)
   ui/          screens (inbox, edit-proposal, conversations, thread, archive search, connectors,
                preferences, settings, sign-in), navigation, theme, shared components
   config/      cross-cutting leaf (env + secure keys); logger, toast/haptics, Paper kit and OIDC come
                from the @danbro96/lupira-* packages
 ```
 
-Assistant gestures (approve / edit / dismiss / answer) apply optimistically, persist to the inbox
-cache, and queue on the acks stream, so the inbox works offline.
+Assistant gestures (approve / edit / dismiss / answer) apply optimistically and queue in the sync
+engine's outbox, so the inbox works offline. Online-only reads use `onlineQuery`, persisted for the
+`assistant` and `comms` key roots.
 
-The layered import graph is enforced by `eslint.config.mjs`. Notably, the **sync** layer never
-imports `state`/`ui`, keeping the headless background JS context's dependency cone small.
+The layered import graph is enforced by `eslint.config.mjs`. The headless background task
+(`state/background-sync-task.ts`) imports only the engine and the auth store, never `ui`, keeping its
+dependency cone small.
 
 ---
 

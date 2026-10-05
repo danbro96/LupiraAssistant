@@ -4,10 +4,10 @@ import { List, Switch } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
-import { useSyncStatus } from '../../sync/sync-status';
-import { kickSync } from '../../sync/sync-engine';
+import { useOnline } from '@danbro96/lupira-expo-query/online';
+import { syncNow, useSyncStatus } from '../../state/sync-status';
 import { useAuth } from '../../state/auth-store';
-import { useInbox } from '../../state/inbox-store';
+import { refreshGrant, useGrantStatus } from '../../state/inbox';
 import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
@@ -26,20 +26,21 @@ export function SettingsScreen() {
   const user = useAuth((s) => s.user);
 
   const status = useSyncStatus();
+  const online = useOnline();
   const apiUrl = useAuth((s) => s.apiUrl);
-  const grantStatus = useInbox((s) => s.grantStatus);
+  const grantStatus = useGrantStatus();
 
   const [connecting, setConnecting] = useState(false);
 
   function onUploadNow() {
-    void kickSync().then(() => toast('Upload triggered.'));
+    void syncNow().then(() => toast('Upload triggered.'));
   }
 
   async function onConnect() {
     setConnecting(true);
     const res = await launchConnect(apiUrl);
     if (res === 'returned') {
-      await useInbox.getState().refreshGrant();
+      await refreshGrant();
       toast('Assistant connection updated.');
     }
     setConnecting(false);
@@ -47,7 +48,7 @@ export function SettingsScreen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <IdentityHeader name={user?.displayName ?? user?.sub ?? 'Not signed in'} sub={user?.displayName ? user.sub : undefined} />
+      <IdentityHeader name={user?.name ?? user?.sub ?? 'Not signed in'} sub={user?.name ? user.sub : undefined} />
 
       <List.Subheader>Assistant</List.Subheader>
       <Row label="Grant" value={grantStatus} styles={styles} />
@@ -63,8 +64,8 @@ export function SettingsScreen() {
       <List.Item title="Sources" onPress={() => navigation.navigate('Connectors')} />
 
       <List.Subheader>Upload status</List.Subheader>
-      <Row label="Connectivity" value={status.online ? 'online' : 'offline'} styles={styles} />
-      <Row label="Uploading" value={status.uploading ? 'yes' : 'no'} styles={styles} />
+      <Row label="Connectivity" value={online ? 'online' : 'offline'} styles={styles} />
+      <Row label="Uploading" value={status.phase !== 'idle' ? 'yes' : 'no'} styles={styles} />
       <View style={styles.action}>
         <Button title="Upload now" onPress={onUploadNow} />
       </View>

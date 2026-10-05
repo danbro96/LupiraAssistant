@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { setDeviceKeyPort } from './auth-ports';
 import { ingestRingSamples } from './generated/health-ingest/ingest/ingest';
+import { DeviceKeyInvalidError } from '../../domain/api-error';
 
 vi.mock('expo-constants', () => ({ default: { expoConfig: { version: '0.0.0' } } }));
 
@@ -46,10 +47,13 @@ describe('deviceKeyFetch over the generated ingest client', () => {
     expect(headers.get('Authorization')).toContain('kid.secret');
   });
 
-  it('returns the parsed receipt in the envelope', async () => {
-    const res = await ingestRingSamples('{"seq":1}');
+  it('returns the parsed receipt', async () => {
+    expect(await ingestRingSamples('{"seq":1}')).toEqual({ rejects: [], paused: false });
+  });
 
-    expect(res.status).toBe(202);
-    expect(res.data).toEqual({ rejects: [], paused: false });
+  it('reports a revoked key as DeviceKeyInvalidError, not an OIDC re-auth', async () => {
+    globalThis.fetch = vi.fn(async () => new Response('', { status: 401 })) as typeof globalThis.fetch;
+
+    await expect(ingestRingSamples('{"seq":1}')).rejects.toBeInstanceOf(DeviceKeyInvalidError);
   });
 });

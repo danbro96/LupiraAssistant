@@ -10,7 +10,6 @@ import {
   OIDC_SCHEME,
   OIDC_SCOPES,
 } from '../../data/auth/oidc-config';
-import { decodeJwt } from '@danbro96/lupira-expo-oidc/oidc';
 import { oidc } from '../../data/auth/oidc';
 import { useAuth } from '../../state/auth-store';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
@@ -42,17 +41,7 @@ async function exchangeCodeForSession(
       redirectUri,
       codeVerifier: request.codeVerifier,
     });
-    const claims = decodeJwt(token.idToken ?? token.accessToken);
-    const email = (claims.email as string) ?? (claims.preferred_username as string) ?? (claims.sub as string) ?? '';
-    const name = (claims.name as string) ?? undefined;
-    await useAuth.getState().setSession(
-      {
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
-        expiresAt: Date.now() + (token.expiresIn ?? 3600) * 1000,
-      },
-      { sub: email, displayName: name },
-    );
+    await useAuth.getState().setSession(token);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     logDebug('signin:error', msg);

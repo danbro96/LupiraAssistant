@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Switch, Text } from 'react-native-paper';
-import { useSettings } from '../../state/settings-store';
+import { usePreferences, useSavePreferences } from '../../state/settings';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
@@ -14,18 +14,14 @@ export function PreferencesScreen() {
   const c = useColors();
   const styles = makeStyles(c);
 
-  const preferences = useSettings((s) => s.preferences);
-  const saving = useSettings((s) => s.savingPreferences);
+  const preferences = usePreferences();
+  const { save, saving } = useSavePreferences();
 
   const [digest, setDigest] = useState(false);
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [zone, setZone] = useState('');
   const [seededFrom, setSeededFrom] = useState<typeof preferences>(null);
-
-  useEffect(() => {
-    void useSettings.getState().loadPreferences();
-  }, []);
 
   // Seed the form once the server state arrives.
   if (preferences !== seededFrom) {
@@ -39,7 +35,7 @@ export function PreferencesScreen() {
   }
 
   async function onSave() {
-    const okSaved = await useSettings.getState().savePreferences({
+    const okSaved = await save({
       mode: digest ? 'Digest' : 'PerItem',
       quietHoursStart: start.trim() || undefined,
       quietHoursEnd: end.trim() || undefined,

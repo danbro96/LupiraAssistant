@@ -5,7 +5,7 @@ import '@danbro96/lupira-expo-oidc/crypto';
 import 'react-native-gesture-handler';
 
 // defineTask() must run during cold start of the OS's bare JS context, so register at module top level.
-import './src/sync/background-upload-task';
+import './src/state/background-sync-task';
 
 import { registerRootComponent } from 'expo';
 
