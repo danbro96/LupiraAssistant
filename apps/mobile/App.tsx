@@ -53,7 +53,7 @@ function App() {
     void (async () => {
       await Promise.all([useAuth.getState().load(), usePrefs.getState().init()]);
       await useAuth.getState().refreshIfNeeded();
-      stopTriggers = startSyncTriggers(engine, { backgroundTaskName: SYNC_TASK });
+      stopTriggers = startSyncTriggers(engine, { backgroundTaskName: SYNC_TASK, registerBackgroundTask: !__DEV__ });
       // Signed in → keep the hub's push registry current, then honor a cold-start notice tap.
       if (useAuth.getState().isAuthenticated()) void registerPushToken();
       void handleLaunchNotice();
