@@ -13,7 +13,8 @@ import { useInbox } from '../../state/inbox-store';
 import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
-import { useConfirm } from '@danbro96/lupira-expo-paper/components/ConfirmDialog';
+import { IdentityHeader } from '@danbro96/lupira-expo-paper/components/IdentityHeader';
+import { VersionLine } from '@danbro96/lupira-expo-paper/components/VersionLine';
 import { spacing, type Palette, useColors } from '../theme';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
@@ -24,7 +25,7 @@ export function SettingsScreen() {
   const styles = makeStyles(c);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const debugEnabled = usePrefs((s) => s.debugEnabled);
-  const confirm = useConfirm();
+  const user = useAuth((s) => s.user);
 
   const status = useSyncStatus();
   const apiUrl = useAuth((s) => s.apiUrl);
@@ -46,20 +47,9 @@ export function SettingsScreen() {
     setConnecting(false);
   }
 
-  async function onSignOut() {
-    const ok = await confirm({
-      title: 'Sign out?',
-      message: 'You will need to sign in again.',
-      confirmLabel: 'Sign out',
-      destructive: true,
-    });
-    if (!ok) return;
-    await useAuth.getState().clearSession();
-  }
-
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Row label="Version" value={`${APP_VERSION} · ${UPDATE_LABEL}`} styles={styles} />
+      <IdentityHeader name={user?.displayName ?? user?.sub ?? 'Not signed in'} sub={user?.displayName ? user.sub : undefined} />
 
       <List.Subheader>Assistant</List.Subheader>
       <Row label="Grant" value={grantStatus} styles={styles} />
@@ -91,9 +81,8 @@ export function SettingsScreen() {
       />
       {debugEnabled ? <List.Item title="Developer options" onPress={() => navigation.navigate('Developer')} /> : null}
 
-      <View style={styles.action}>
-        <Button title="Sign out" variant="destructive" onPress={() => void onSignOut()} />
-      </View>
+      <List.Subheader>About</List.Subheader>
+      <VersionLine app="Lupira Assistant" version={APP_VERSION} updateLabel={UPDATE_LABEL} />
     </ScrollView>
   );
 }

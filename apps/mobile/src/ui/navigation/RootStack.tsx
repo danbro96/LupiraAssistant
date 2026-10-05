@@ -16,7 +16,8 @@ import { useAuth } from '../../state/auth-store';
 import { useColors } from '../theme';
 import type { RootStackParamList, TabParamList } from './types';
 import { ICONS } from '../icons';
-import { SettingsButton } from '@danbro96/lupira-expo-paper/components/SettingsButton';
+import { useStackScreenOptions } from '@danbro96/lupira-expo-paper/hooks/useStackScreenOptions';
+import { AccountMenu } from '../components/AccountMenu';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<TabParamList>();
@@ -27,10 +28,10 @@ export function RootStack() {
   const authed = useAuth((s) => !!s.token && !!s.user);
 
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={useStackScreenOptions()}>
       {authed ? (
         <>
-          <Stack.Screen name="Tabs" component={TabLayout} options={{ headerShown: false }} />
+          <Stack.Screen name="Tabs" component={TabLayout} options={{ headerShown: false, contentStyle: { paddingBottom: 0 } }} />
           <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
           <Stack.Screen name="Developer" component={DeveloperScreen} options={{ title: 'Developer' }} />
           <Stack.Screen name="DebugLog" component={DebugLogScreen} options={{ title: 'Debug log' }} />
@@ -54,7 +55,7 @@ function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: c.primary,
         tabBarInactiveTintColor: c.textMuted,
-        headerRight: () => <SettingsButton />,
+        headerRight: () => <AccountMenu />,
       }}
     >
       <Tabs.Screen
