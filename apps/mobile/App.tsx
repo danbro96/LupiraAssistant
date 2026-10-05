@@ -19,20 +19,12 @@ import { usePrefs } from './src/state/prefs-store';
 import { startSyncTriggers, kickSync } from './src/sync/sync-engine';
 import { registerUploadTask } from './src/sync/background-upload-task';
 import { SENTRY_DSN } from './src/config/env';
-import { UPDATE_CHANNEL, UPDATE_ID } from '@danbro96/lupira-expo-diagnostics/buildInfo';
+import { initSentry } from '@danbro96/lupira-expo-diagnostics/initSentry';
 import { lightColors, darkColors, navDark, navLight, paperDark, paperLight, type Palette } from './src/ui/theme';
 import { paperSettings } from '@danbro96/lupira-expo-paper/theme/paperSettings';
 
 // SENTRY_DSN is a public client key; Sentry no-ops when empty.
-Sentry.init({
-  dsn: SENTRY_DSN,
-  enabled: !!SENTRY_DSN,
-  tracesSampleRate: 0.2,
-  sendDefaultPii: false,
-  environment: __DEV__ ? 'development' : 'production',
-});
-Sentry.setTag('update_id', UPDATE_ID ?? 'none');
-Sentry.setTag('update_channel', UPDATE_CHANNEL ?? 'none');
+initSentry(SENTRY_DSN);
 
 function ErrorFallback({ palette }: { palette: Palette }) {
   return (

@@ -1,4 +1,3 @@
-import Constants from 'expo-constants';
 
 /** Every call goes through the assistant BFF — one origin; the path prefix picks the upstream
  *  (`/api` assistant, `/comms-api`, `/health-api`, device ingest at `/ingest`). */
@@ -47,7 +46,6 @@ export const DIAGNOSTIC_ROUTES: { route: string; label: string }[] = [
   { route: 'DebugLog', label: 'Debug log' },
 ];
 
-export const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 /** Public client key, safe to commit. Empty disables crash reporting. */
 export const SENTRY_DSN = '';

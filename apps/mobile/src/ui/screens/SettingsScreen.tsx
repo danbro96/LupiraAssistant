@@ -7,14 +7,12 @@ import type { RootStackParamList } from '../navigation/types';
 import { useSyncStatus } from '../../sync/sync-status';
 import { kickSync } from '../../sync/sync-engine';
 import { useAuth } from '../../state/auth-store';
-import { APP_VERSION } from '../../config/env';
-import { UPDATE_LABEL } from '@danbro96/lupira-expo-diagnostics/buildInfo';
 import { useInbox } from '../../state/inbox-store';
 import { usePrefs } from '../../state/prefs-store';
 import { launchConnect } from '../../data/auth/connect';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { IdentityHeader } from '@danbro96/lupira-expo-paper/components/IdentityHeader';
-import { VersionLine } from '@danbro96/lupira-expo-paper/components/VersionLine';
+import { VersionLine } from '@danbro96/lupira-expo-diagnostics/VersionLine';
 import { spacing, type Palette, useColors } from '../theme';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
@@ -82,7 +80,7 @@ export function SettingsScreen() {
       {debugEnabled ? <List.Item title="Developer options" onPress={() => navigation.navigate('Developer')} /> : null}
 
       <List.Subheader>About</List.Subheader>
-      <VersionLine app="Lupira Assistant" version={APP_VERSION} updateLabel={UPDATE_LABEL} />
+      <VersionLine />
     </ScrollView>
   );
 }
