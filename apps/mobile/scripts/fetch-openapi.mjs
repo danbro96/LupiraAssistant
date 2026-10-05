@@ -14,6 +14,7 @@ const appRoot = path.resolve(__dirname, '..');
 const workspaceRoot = path.resolve(__dirname, '../../..');
 
 const SPECS = [
+  { api: 'LupiraHealthApi', out: 'backend-health-openapi.json' },
   { api: 'LupiraAssistantApi', out: 'backend-assistant-openapi.json' },
   { api: 'LupiraCommsApi', out: 'backend-comms-openapi.json' },
 ];

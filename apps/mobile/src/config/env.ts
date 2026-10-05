@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 /** Every call goes through the assistant BFF — one origin; the path prefix picks the upstream
- *  (`/api` assistant, `/comms-api`). */
+ *  (`/api` assistant, `/comms-api`, `/health-api`, device ingest at `/ingest`). */
 
 /** 'dev' = the BFF's bypass; it and every upstream accept an `X-Dev-User` header in Development. */
 export type AuthMode = 'oidc' | 'dev';

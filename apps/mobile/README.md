@@ -2,7 +2,7 @@
 
 The **assistant surface** (React Native / Expo): an inbox of proposals the assistant wants approved,
 a read-only browser over the captured comms archive, and settings. It reaches the estate through the
-repo's own .NET BFF, which fronts assistant-api and comms-api.
+repo's own .NET BFF, which fronts assistant-api, comms-api and health-api.
 
 Architecture and conventions mirror the sibling app **LupiraTasksMobile** (Expo SDK 57, layered
 `domain → data → sync → state → ui` enforced by `eslint-plugin-boundaries`, Zustand, `expo-sqlite`,
@@ -93,6 +93,11 @@ The layered import graph is enforced by `eslint.config.mjs`. Notably, the **sync
 imports `state`/`ui`, keeping the headless background JS context's dependency cone small.
 
 ---
+
+## Smart ring (not wired)
+
+The `pending_ring` / `pending_summaries` tables, their repos and the `ingestRingSamples` / `ingestSummaries`
+clients exist; nothing writes them and the sync engine drains `acks` only.
 
 ## Testing & verification
 

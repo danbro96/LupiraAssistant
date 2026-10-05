@@ -5,4 +5,7 @@ export const SECURE_KEYS = {
 
   userSub: 'lupira.assistant.oidc.userSub',
   userName: 'lupira.assistant.oidc.userName',
+
+  /** The full `{keyId:N}.{secret}` ingest key. SECRET — never log it. */
+  apiKey: 'lupira.assistant.apiKey',
 } as const;

@@ -39,7 +39,7 @@ public sealed class BffTestFactory : WebApplicationFactory<Program>, IAsyncLifet
         // UseSetting, not ConfigureAppConfiguration: with minimal hosting the factory's config sources are
         // appended at Build(), AFTER Program.cs top-level code has already read values — settings injected
         // this way are visible from the first line.
-        foreach (var cluster in new[] { "assistant-api", "comms-api", "location-api", "health-api" })
+        foreach (var cluster in new[] { "assistant-api", "comms-api", "health-api" })
             builder.UseSetting($"ReverseProxy:Clusters:{cluster}:Destinations:primary:Address", Upstream.Address);
         builder.UseSetting("Auth:Bearer:Authority", Issuer);
         builder.UseSetting("OTEL_EXPORTER_OTLP_ENDPOINT", "http://127.0.0.1:9");

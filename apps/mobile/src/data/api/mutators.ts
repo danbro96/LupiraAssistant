@@ -1,10 +1,12 @@
-import { oidcAuthPort } from './auth-ports';
+import { oidcAuthPort, deviceKeyPort } from './auth-ports';
 import { coreFetch, joinUrl } from './http';
 import { ApiError } from '@danbro96/lupira-http/apiError';
+import { DeviceKeyInvalidError } from '../../domain/api-error';
+import { buildDeviceKeyHeader } from '../../domain/device-key-auth';
 import { isRetriableRequest } from '@danbro96/lupira-http/retryPolicy';
 import { DEV_USER } from '../../config/env';
 
-// Every target shares the BFF origin, and the path carries its prefix.
+// One mutator per auth scheme — every target shares the BFF origin, and the path carries its prefix.
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const auth = oidcAuthPort();
@@ -40,6 +42,40 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
       throw e;
     }
   }
+}
+
+// Reads the live key each call so rotation/clear takes effect immediately; 401 = revoked key → re-register,
+// not OIDC re-auth.
+export async function deviceKeyFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const port = deviceKeyPort();
+  const apiKey = await port.getApiKey();
+  if (!apiKey) throw new ApiError(0, 'No device key — register this device first.');
+
+  const headers = new Headers(init.headers ?? {});
+  headers.set('Authorization', buildDeviceKeyHeader(apiKey));
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+
+  try {
+    const res = await coreFetch(
+      joinUrl(port.getApiUrl(), path),
+      { ...init, headers, body: rawBody(headers, init.body) },
+      { retriable: true },
+    );
+    return await envelope<T>(res);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) throw new DeviceKeyInvalidError();
+    throw e;
+  }
+}
+
+/**
+ * The ingest endpoints take NDJSON, but the generated client JSON-encodes every request body — which
+ * would send the batch as one quoted, escaped string. Decode it back to the raw text it already was.
+ */
+function rawBody(headers: Headers, body: BodyInit | null | undefined): BodyInit | null | undefined {
+  if (typeof body !== 'string') return body;
+  if (!(headers.get('Content-Type') ?? '').includes('x-ndjson')) return body;
+  return JSON.parse(body) as string;
 }
 
 async function envelope<T>(res: Response): Promise<T> {

@@ -27,7 +27,6 @@ public class ProxyRoutesTests
 
         Assert.Equal(
             ["/api/auth/callback", "/api/auth/done", "/api/auth/login",
-             "/ingest/location", "/ingest/location/cursor", "/ingest/location/state",
              "/ingest/ring", "/ingest/summaries"],
             anonymous);
     }

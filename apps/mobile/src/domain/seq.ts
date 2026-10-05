@@ -1,2 +1,3 @@
-// The acks queue (inbox resolve/answer gestures) keeps its own monotonic seq.
-export type Stream = 'acks';
+// Independent offline streams, each with its own monotonic seq: the health ring and summaries uploads
+// plus the inbox acks queue (resolve/answer gestures).
+export type Stream = 'ring' | 'summaries' | 'acks';

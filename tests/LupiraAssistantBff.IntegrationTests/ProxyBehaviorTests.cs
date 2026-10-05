@@ -54,7 +54,6 @@ public sealed class ProxyBehaviorTests(BffTestFactory factory) : IClassFixture<B
 
     [Theory]
     [InlineData("/comms-api/topics?status=released", "/topics")]
-    [InlineData("/location-api/devices", "/devices")]
     [InlineData("/health-api/me", "/me")]
     public async Task Upstream_route_strips_its_own_prefix_without_announcing_it(string url, string upstreamPath)
     {
@@ -78,8 +77,8 @@ public sealed class ProxyBehaviorTests(BffTestFactory factory) : IClassFixture<B
 
     [Theory]
     [InlineData("/api/admin/secrets")]
-    [InlineData("/location-api/location/track")]
     [InlineData("/health-api/health/ring")]
+    [InlineData("/location-api/devices")]
     public async Task Unlisted_path_under_a_prefix_is_404_even_when_signed_in(string url)
     {
         var res = await MemberClient().GetAsync(url);
@@ -94,7 +93,6 @@ public sealed class ProxyBehaviorTests(BffTestFactory factory) : IClassFixture<B
     }
 
     [Theory]
-    [InlineData("/ingest/location")]
     [InlineData("/ingest/ring")]
     [InlineData("/ingest/summaries")]
     public async Task Device_ingest_forwards_a_well_formed_key_untouched(string path)
@@ -119,8 +117,21 @@ public sealed class ProxyBehaviorTests(BffTestFactory factory) : IClassFixture<B
         var client = Client();
         if (authorization is not null) client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", authorization);
 
-        var res = await client.PostAsync("/ingest/location", new StringContent("{}\n"));
+        var res = await client.PostAsync("/ingest/ring", new StringContent("{}\n"));
 
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("/ingest/location")]
+    [InlineData("/ingest/location/cursor")]
+    public async Task Retired_location_ingest_is_404(string path)
+    {
+        var client = Client();
+        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", DeviceKey);
+
+        var res = await client.PostAsync(path, new StringContent("{}\n"));
+
+        Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 }

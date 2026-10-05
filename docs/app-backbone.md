@@ -20,13 +20,15 @@ The client side is an npm-workspaces monorepo (the LupiraCal pattern), so the mo
 | `packages/domain` | `@lupira/assistant-domain`: shared pure TS (inbox mapping, ack classification, edit specs, thread paging), consumed as source, vitest-tested, kept dependency-free by its own eslint config. |
 | `src/LupiraAssistantBff` | The **BFF**: .NET 10, Authentik bearer + YARP. The future SPA lands beside it. |
 
-**One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
+**One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`, `/health-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. Device ingest (`/ingest/ring`, `/ingest/summaries`) is routed at the upstream's own path, unauthenticated at the BFF because only the upstream holds the device keys; the BFF rejects a malformed `DeviceKey` header and passes a well-formed one through untouched. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
 
 ```mermaid
 flowchart LR
   APP[apps/mobile] -->|bearer| BFF[assistant.lupira.com<br/>LupiraAssistantBff]
   BFF -->|/api| HUB[assistant-api · LAN]
   BFF -->|/comms-api| COMMS[comms-api · LAN]
+  APP -->|DeviceKey /ingest| BFF
+  BFF -->|/health-api + /ingest/ring,summaries| HEALTH[health-api · LAN]
   HUB -->|content-minimal wake| EXPO[Expo → FCM/APNs]
 ```
 
@@ -46,11 +48,11 @@ graph TD
 - **Auth** — Authentik OIDC public PKCE (`expo-auth-session`), client `lupira-assistant-mobile`, tokens in SecureStore, on-demand refresh with single-flight dedup and a definitive-vs-transient split (`createTokenRefresher` and `secureSessionStore` from `@danbro96/lupira-expo-oidc`; [src/data/auth/oidc.ts](../apps/mobile/src/data/auth/oidc.ts), [src/state/auth-store.ts](../apps/mobile/src/state/auth-store.ts)). The data layer reaches the live token through auth-ports, never importing `state`.
 - **Store-and-forward queue** — SQLite `pending_acks` with a monotonic per-stream `seq` (stream `acks`, [src/domain/seq.ts](../apps/mobile/src/domain/seq.ts)), drained by the single-flight [src/sync/sync-engine.ts](../apps/mobile/src/sync/sync-engine.ts) and [src/sync/ack-uploader.ts](../apps/mobile/src/sync/ack-uploader.ts).
 - **Reliability** — Sentry error boundary at the root.
-- **Backend** — one origin, the BFF ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)); each generated client carries its upstream's BFF prefix. One mutator: `apiFetch` (OIDC bearer).
+- **Backend** — one origin, the BFF ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)); each generated client carries its upstream's BFF prefix. Two mutators: `apiFetch` (OIDC bearer) and `deviceKeyFetch` (health ring/summaries ingest, `DeviceKey`).
 
 ## Credentials & grant enrollment
 **Two distinct credentials are established at sign-in** — kept separate to avoid confusion:
-1. **App session** — the public PKCE client `lupira-assistant-mobile`; its bearer authorizes the app's calls through the BFF (assistant-api, comms-api) via the `lupira-{assistant,comms}-aud` scope mappings. The `offline_access` on this client is the *app's* session longevity.
+1. **App session** — the public PKCE client `lupira-assistant-mobile`; its bearer authorizes the app's calls through the BFF (assistant-api, comms-api, health-api) via the `lupira-{assistant,comms,health}-aud` scope mappings. The `offline_access` on this client is the *app's* session longevity.
 2. **Assistant-api offline grant** — assistant-api is the **confidential** Authentik client `lupira-assistant`. The grant is a per-user refresh token minted to **assistant-api** (encrypted, schema `assistant`), letting it write on-behalf-of the user when the user is absent (a 3am fired prompt). The app does not hold this token; it only triggers its creation.
 
 **Grant enrollment is assistant-api-led.** The app launches the hub's hosted flow (`expo-web-browser`) and the server owns the auth-code dance:
@@ -75,8 +77,8 @@ Everything slots into the **existing** element types — no new layer, no `eslin
 | Piece | Layer | Notes |
 |---|---|---|
 | `inbox-item.ts`, `ack.ts`, `edit-spec.ts`, `thread-page.ts` | `packages/domain` | Shared pure logic: wire→view-model mapping, ack classification, per-kind edit specs, thread-page merging. Cross-frontend, so it lives in the package rather than the app |
-| Generated clients `generated/{assistant,comms}/` | `data/api/` | Orval output; the assistant + comms targets carry their BFF prefix |
-| `mutators.ts` | `data/api/` | Injects the **OIDC bearer** for the BFF-fronted backends |
+| Generated clients `generated/{assistant,comms,health}/` | `data/api/` | Orval output; the assistant, comms and health targets carry their BFF prefix |
+| `mutators.ts` | `data/api/` | Injects the **OIDC bearer** for the BFF-fronted backends; `DeviceKey` stays for ingest |
 | `pending-acks-repo.ts` + `pending_acks` table | `data/db/` | Uses `seq.ts` with stream `acks` |
 | Inbox cache repo | `data/db/` | Persists the last Inbox fetch for offline read |
 | Enrollment launcher + return handling | `data/auth/` | Opens the hosted `/auth/login?return_uri=`, resolves the deep link |
@@ -92,7 +94,7 @@ Everything slots into the **existing** element types — no new layer, no `eslin
 | Notification display + tap-routing | `ui/notifications.ts` + `App.tsx` | `expo-notifications` handlers wired at the root; `navigationRef` routes a tap |
 
 ## API integration
-The app consumes both backends through Orval-generated clients — one target per upstream, each with its BFF prefix baked into `baseUrl`, so a call site never knows which host answers. Specs come from the API repos' build output (`npm run fetch:openapi`), never a running server.
+The app consumes its backends through Orval-generated clients — one target per upstream, each with its BFF prefix baked into `baseUrl`, so a call site never knows which host answers. Specs come from the API repos' build output (`npm run fetch:openapi`), never a running server.
 
 **assistant-api** (`/api`):
 

@@ -2,7 +2,6 @@
   "clusters": {
     "assistant-api": { "prefix": "/api", "announcePrefix": true },
     "comms-api": { "prefix": "/comms-api" },
-    "location-api": { "prefix": "/location-api" },
     "health-api": { "prefix": "/health-api" }
   },
   "groups": {
@@ -36,13 +35,6 @@
       "GET /records",
       "POST /me/bootstrap",
       "POST /records"
-    ],
-    "location-api": [
-      "DELETE /devices/{id}",
-      "GET /devices",
-      "GET /me",
-      "POST /devices",
-      "PUT /devices/{id}"
     ]
   },
   "anonymous": {
@@ -57,11 +49,6 @@
     "health-api": [
       "POST /ingest/ring",
       "POST /ingest/summaries"
-    ],
-    "location-api": [
-      "GET /ingest/location/cursor",
-      "GET /ingest/location/state",
-      "POST /ingest/location"
     ]
   }
 }

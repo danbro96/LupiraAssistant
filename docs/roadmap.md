@@ -14,7 +14,7 @@ The idea is sound and the design fits the core goal: the LLM runs at only two en
 | tasks-api | Ahead of its own doc: relations, `ListKind.Agent`, rich `ItemStatus`, metadata shipped. 16 MCP tools. No scheduler (non-goal honored). |
 | gpt-api | Deployed: strict `response_format` json_schema→GBNF + response-vs-schema validation (batch 2); tool defs forwarded blind (no executor), token budgets unenforced. |
 | comms-api | Built end-to-end: Telegram userbot, **live IMAP mail connector** + mbox/Maildir import, semantic segmentation, durable outbox push, Facebook backfill importer, MCP `archive_search` + topic reads, and the owner REST archive surface (search / conversations / thread paging / connector status). |
-| BFF (`LupiraAssistantBff`) | Built: bearer-authed YARP over an `exposed.json` allowlist (assistant, comms, location, health + device ingest), `X-Forwarded-Prefix` for the hub's proxied enrollment, hermetic integration tests, CI + deploy config. **Not yet deployed** (image, tunnel + Authentik redirect URI pending). |
+| BFF (`LupiraAssistantBff`) | Built: bearer-authed YARP over an `exposed.json` allowlist (assistant, comms, health + device ingest), `X-Forwarded-Prefix` for the hub's proxied enrollment, hermetic integration tests, CI + deploy config. **Not yet deployed** (image, tunnel + Authentik redirect URI pending). |
 | Mobile app | The canonical surface, live against the hub: inbox (proposals/questions/notices), schema-driven edit forms for all four kinds, offline `acks` queue, archive browser, Expo push, connector status + preferences, Inbox/Archive tabs. |
 
 Agent tool surface (MCP `/mcp`, LAN-only): cal 17 · tasks 16 · career 10 (rw) · health 5 (ro) · location 7 (ro, coarse) · LlmUtility ~28 (deterministic) · LlmSandbox `run_code` · DevOps 10. assistant-api exposes none (consumer — correct).
@@ -84,6 +84,7 @@ Foundation (layers/eslint-boundaries, PKCE auth, store-and-forward acks queue) m
 - **Device verification pending**: push (real EAS build → token registration, notification arrival, tap routing, quiet-hours suppression) and the archive browser's paging behaviour on a large corpus have only been exercised against the hub's tests and typecheck, not on hardware.
 - Notices deep-link to the Inbox tab, not to the individual item (the payload carries the id; the screen has no per-item route yet).
 - Editing a proposal always submits `Edit` + approve — there's no "save the edit, decide later", since the hub's Edit-without-payload path only records intent.
+- ring/summaries streams stay scaffolding: seq keys, `pending_*` tables, and HealthApi ingest fns exist, but nothing writes them and the sync engine flushes `acks` only; the HealthApi device key isn't minted.
 
 ### cal-api
 - **DAV object paths don't gate on `Class == Agenda`.** System calendars are hidden from PROPFIND discovery, but a direct `REPORT`/`GET` with a known calendar GUID is only ACL-checked (`DavRouter.HandleCalendarReport`/`GetItem`) — the backbone's "System calendars never in DAV" isn't a hard guarantee.
