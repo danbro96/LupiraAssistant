@@ -2,15 +2,14 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { DEFAULT_API_URL, DEFAULT_AUTH_MODE, type AuthMode } from '../config/env';
 import { SECURE_KEYS } from '../config/secure-keys';
-import { setOidcAuthPort, setDeviceKeyPort } from '../data/api/auth-ports';
+import { setOidcAuthPort } from '../data/api/auth-ports';
 import { createTokenRefresher, secureSessionStore } from '@danbro96/lupira-expo-oidc/tokenSession';
 import { oidc } from '../data/auth/oidc';
 import { dropPushRegistration } from '../data/push/push-session';
-import { getApiKey } from '../data/secure/device-credentials';
 import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
-// OIDC session — every BFF call except device ingest, which uses the device key.
+// OIDC session for every BFF call.
 
 const sessionStore = secureSessionStore('lupira.assistant.oidc');
 
@@ -146,9 +145,4 @@ setOidcAuthPort({
   getAuthMode: () => useAuth.getState().authMode,
   getToken: () => useAuth.getState().token,
   refresh: (force, sentToken) => useAuth.getState().refreshIfNeeded({ force, sentToken }),
-});
-
-setDeviceKeyPort({
-  getApiUrl: apiUrl,
-  getApiKey: () => getApiKey(),
 });

@@ -14,9 +14,7 @@ import { registerPushToken } from './src/data/push/push-registration';
 import { ToastHost } from '@danbro96/lupira-expo-paper/components/ToastHost';
 import { ConfirmDialogHost } from '@danbro96/lupira-expo-paper/components/ConfirmDialog';
 import { useAuth } from './src/state/auth-store';
-import { useDevice } from './src/state/device-store';
 import { useInbox } from './src/state/inbox-store';
-import { useCollector } from './src/state/collector-store';
 import { usePrefs } from './src/state/prefs-store';
 import { startSyncTriggers, kickSync } from './src/sync/sync-engine';
 import { registerUploadTask } from './src/sync/background-upload-task';
@@ -41,7 +39,7 @@ function ErrorFallback({ palette }: { palette: Palette }) {
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: palette.bg }}>
       <Text style={{ fontSize: 18, fontWeight: '700', color: palette.text, marginBottom: 8 }}>Something went wrong</Text>
       <Text style={{ color: palette.textMuted, textAlign: 'center' }}>
-        The app hit an unexpected error. Please reopen it — your buffered fixes are saved on this device.
+        The app hit an unexpected error. Please reopen it.
       </Text>
     </View>
   );
@@ -50,21 +48,18 @@ function ErrorFallback({ palette }: { palette: Palette }) {
 function App() {
   useAutoUpdate();
   const authLoaded = useAuth((s) => s.loaded);
-  const deviceLoaded = useDevice((s) => s.loaded);
   const scheme = useColorScheme();
 
   useEffect(() => {
     void (async () => {
       await Promise.all([
         useAuth.getState().load(),
-        useDevice.getState().load(),
         useInbox.getState().loadFromCache(),
         usePrefs.getState().init(),
       ]);
       await useAuth.getState().refreshIfNeeded();
-      await useCollector.getState().hydrate();
       await registerUploadTask();
-      void kickSync({ resume: true, poll: true });
+      void kickSync();
       // Signed in → keep the hub's push registry current, then honor a cold-start notice tap.
       if (useAuth.getState().isAuthenticated()) void registerPushToken();
       void handleLaunchNotice();
@@ -77,7 +72,7 @@ function App() {
     };
   }, []);
 
-  if (!authLoaded || !deviceLoaded) return null;
+  if (!authLoaded) return null;
 
   const palette = scheme === 'dark' ? darkColors : lightColors;
 

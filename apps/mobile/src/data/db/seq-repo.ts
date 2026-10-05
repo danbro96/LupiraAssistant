@@ -12,23 +12,3 @@ export async function nextSeq(db: Db, stream: Stream): Promise<number> {
   if (!row) throw new Error(`seq_counter row missing for stream '${stream}'`);
   return row.last_seq;
 }
-
-export async function peekSeq(db: Db, stream: Stream): Promise<number> {
-  const row = await db.getFirstAsync<{ last_seq: number }>(
-    `SELECT last_seq FROM seq_counter WHERE stream = ?`,
-    [stream],
-  );
-  return row?.last_seq ?? 0;
-}
-
-/** Seeds from the server cursor after reinstall; never lowers. */
-export async function ensureAtLeast(db: Db, stream: Stream, value: number): Promise<void> {
-  await db.runAsync(
-    `UPDATE seq_counter SET last_seq = ? WHERE stream = ? AND last_seq < ?`,
-    [value, stream, value],
-  );
-}
-
-export async function resetSeq(db: Db, stream: Stream, value = 0): Promise<void> {
-  await db.runAsync(`UPDATE seq_counter SET last_seq = ? WHERE stream = ?`, [value, stream]);
-}

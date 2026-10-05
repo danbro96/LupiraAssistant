@@ -9,7 +9,7 @@ export const UPLOAD_TASK = 'lupira.assistant.upload';
 
 TaskManager.defineTask(UPLOAD_TASK, async () => {
   try {
-    await kickSync({ resume: true, poll: true });
+    await kickSync();
     return BackgroundTask.BackgroundTaskResult.Success;
   } catch (e) {
     logDebug('bg-upload:error', e instanceof Error ? e.message : String(e));

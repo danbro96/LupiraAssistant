@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { RegisterDeviceScreen } from '../screens/RegisterDeviceScreen';
+import { SignInScreen } from '../screens/SignInScreen';
 import { InboxScreen } from '../screens/InboxScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { DebugLogScreen } from '@danbro96/lupira-expo-diagnostics/DebugLogScreen';
@@ -12,7 +12,7 @@ import { ConversationsScreen } from '../screens/ConversationsScreen';
 import { ThreadScreen } from '../screens/ThreadScreen';
 import { ConnectorsScreen } from '../screens/ConnectorsScreen';
 import { PreferencesScreen } from '../screens/PreferencesScreen';
-import { useDevice } from '../../state/device-store';
+import { useAuth } from '../../state/auth-store';
 import { useColors } from '../theme';
 import type { RootStackParamList, TabParamList } from './types';
 import { ICONS } from '../icons';
@@ -21,14 +21,14 @@ import { SettingsButton } from '@danbro96/lupira-expo-paper/components/SettingsB
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tabs = createBottomTabNavigator<TabParamList>();
 
-// Gated on device registration: the register flow until a device key is stored, then the tabs
-// (Inbox / Archive) with Settings and the detail screens pushed over them.
+// Gated on sign-in: the sign-in screen until a session exists, then the tabs (Inbox / Archive)
+// with Settings and the detail screens pushed over them.
 export function RootStack() {
-  const registered = useDevice((s) => s.registered);
+  const authed = useAuth((s) => !!s.token && !!s.user);
 
   return (
     <Stack.Navigator>
-      {registered ? (
+      {authed ? (
         <>
           <Stack.Screen name="Tabs" component={TabLayout} options={{ headerShown: false }} />
           <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
@@ -41,7 +41,7 @@ export function RootStack() {
           <Stack.Screen name="Preferences" component={PreferencesScreen} options={{ title: 'Notifications' }} />
         </>
       ) : (
-        <Stack.Screen name="RegisterDevice" component={RegisterDeviceScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
       )}
     </Stack.Navigator>
   );

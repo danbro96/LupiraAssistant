@@ -2,7 +2,6 @@ import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { createPushToken, deletePushToken } from '../api/generated/assistant/push/push';
-import { getDeviceId } from '../secure/device-credentials';
 import { logDebug } from '@danbro96/lupira-expo-diagnostics/log';
 
 // Expo push registration. The token is a routing address, not a secret — it lives in the hub's
@@ -34,7 +33,6 @@ export async function registerPushToken(): Promise<string | null> {
   try {
     await createPushToken({
       token,
-      deviceId: await getDeviceId(),
       platform: Platform.OS === 'ios' ? 'Ios' : 'Android',
     });
     return token;

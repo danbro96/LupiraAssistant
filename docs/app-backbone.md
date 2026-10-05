@@ -8,7 +8,7 @@
 The app is the **user-facing surface** — the only surface Daniel touches; everything else is invisible plumbing. It is a **thin client**: no LLM, no agent logic, no voice, no chat thread. It renders the assistant's proposals, questions, and notices, and relays a tap or a short answer back — proactive **propose→confirm**, never an open-ended query. All reasoning lives in assistant-api; the app never calls the gateway.
 
 Two halves:
-- **Background substrate** — sign-in, device registration, the store-and-forward location stream, the on-behalf-of grant enrollment.
+- **Background substrate** — sign-in, the store-and-forward acks queue, the on-behalf-of grant enrollment.
 - **The canonical surface** — an interactive Inbox (Approve/Edit/Dismiss, answer questions, notices), the comms archive browser, native push, and in-app connector status & preferences. The hub's Telegram bot stays an optional secondary confirm channel.
 
 ## Repo shape — a monorepo, one public backend
@@ -20,43 +20,37 @@ The client side is an npm-workspaces monorepo (the LupiraCal pattern), so the mo
 | `packages/domain` | `@lupira/assistant-domain`: shared pure TS (inbox mapping, ack classification, edit specs, thread paging), consumed as source, vitest-tested, kept dependency-free by its own eslint config. |
 | `src/LupiraAssistantBff` | The **BFF**: .NET 10, Authentik bearer + YARP. The future SPA lands beside it. |
 
-**One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`, `/location-api`, `/health-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. Device ingest (`/ingest/*`) is routed at the upstream's own path, unauthenticated at the BFF because only the upstream holds the device keys; the BFF rejects a malformed `DeviceKey` header and passes a well-formed one through untouched. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
+**One public backend.** The app talks to the BFF only — the same shape as CalWeb's BFF. The path prefix picks the upstream (`/api` → assistant-api, `/comms-api`), and only the `VERB /path` pairs in `exposed.json` are routed; anything else under a prefix is a 404. The BFF validates the app's bearer and forwards it verbatim — the upstreams validate it again (defence in depth), so none of them sit on the public edge. The assistant routes re-announce the stripped prefix as `X-Forwarded-Prefix` so the hub's hosted enrollment builds proxied callback URLs.
 
 ```mermaid
 flowchart LR
   APP[apps/mobile] -->|bearer| BFF[assistant.lupira.com<br/>LupiraAssistantBff]
-  APP -->|DeviceKey /ingest| BFF
   BFF -->|/api| HUB[assistant-api · LAN]
   BFF -->|/comms-api| COMMS[comms-api · LAN]
-  BFF -->|/location-api + /ingest/location| LOC[location-api · LAN]
-  BFF -->|/health-api + /ingest/ring,summaries| HEALTH[health-api · LAN]
   HUB -->|content-minimal wake| EXPO[Expo → FCM/APNs]
 ```
 
 ## Foundation it reuses
 The app is already built on the primitives the new surfaces need; they **extend** these, nothing is reinvented.
 
-- **Layered architecture**, downward-only, enforced by the `mobile()` preset of `@danbro96/lupira-config-eslint` (eslint-plugin-boundaries v7; [apps/mobile/eslint.config.mjs](../apps/mobile/eslint.config.mjs)). The spine: `domain → data → {collector, sync} → state → ui`, with the cross-cutting leaf `config` importable by anyone but importing no app layer; the logger, toast/haptics and crypto polyfill come from `@danbro96/lupira-expo-*` packages. `collector` (headless background tasks) and `sync` may **not** reach `state`/`ui`; the sync-status store lives inside `sync/`, so `sync` never imports `state`.
+- **Layered architecture**, downward-only, enforced by the `mobile()` preset of `@danbro96/lupira-config-eslint` (eslint-plugin-boundaries v7; [apps/mobile/eslint.config.mjs](../apps/mobile/eslint.config.mjs)). The spine: `domain → data → sync → state → ui`, with the cross-cutting leaf `config` importable by anyone but importing no app layer; the logger, toast/haptics and crypto polyfill come from `@danbro96/lupira-expo-*` packages. `sync` (which hosts the headless background task) may **not** reach `state`/`ui`; the sync-status store lives inside `sync/`, so `sync` never imports `state`.
 
 ```mermaid
 graph TD
   ui --> state
   state --> sync
-  state --> collector
   sync --> data
-  collector --> data
   data --> domain
 ```
 
 - **Auth** — Authentik OIDC public PKCE (`expo-auth-session`), client `lupira-assistant-mobile`, tokens in SecureStore, on-demand refresh with single-flight dedup and a definitive-vs-transient split (`createTokenRefresher` and `secureSessionStore` from `@danbro96/lupira-expo-oidc`; [src/data/auth/oidc.ts](../apps/mobile/src/data/auth/oidc.ts), [src/state/auth-store.ts](../apps/mobile/src/state/auth-store.ts)). The data layer reaches the live token through auth-ports, never importing `state`.
-- **Device identity** — registration mints a location-api `DeviceKey` (`Authorization: DeviceKey {apiKey}`), SecureStore-only ([src/data/api/registration.ts](../apps/mobile/src/data/api/registration.ts)). This is the **ingest** credential; assistant-api is called with the **OIDC bearer** — a separate credential.
-- **Store-and-forward queue** — a **multi-stream** offline pipeline: SQLite `pending_*` tables, a `sync_state(device_id, stream, …)` cursor, a monotonic per-stream `seq` keyed for `location`/`ring`/`summaries` ([src/domain/seq.ts](../apps/mobile/src/domain/seq.ts)), NDJSON batch upload, and **idempotent receipt apply** that deletes accepted / drops permanent rejects / retries transients ([src/domain/receipt-apply.ts](../apps/mobile/src/domain/receipt-apply.ts), [src/sync/uploader.ts](../apps/mobile/src/sync/uploader.ts), [src/sync/sync-engine.ts](../apps/mobile/src/sync/sync-engine.ts)). Because the queue is already stream-keyed, a new `acks` stream is an addition, not a rewrite.
-- **Reliability** — a server-driven **pause** kill-switch honored by the uploader ([src/sync/pause-poll.ts](../apps/mobile/src/sync/pause-poll.ts)); **cursor-resume** seeds `seq` to max(local, server cursor) so a reinstall can't reuse sequence numbers ([src/sync/cursor-resume.ts](../apps/mobile/src/sync/cursor-resume.ts)); Sentry error boundary at the root.
-- **Backend** — one origin, the BFF ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)); each generated client carries its upstream's BFF prefix. Two mutators: `apiFetch` (OIDC bearer) and `deviceKeyFetch` (location fix ingest + health ring/summaries, `DeviceKey`).
+- **Store-and-forward queue** — SQLite `pending_acks` with a monotonic per-stream `seq` (stream `acks`, [src/domain/seq.ts](../apps/mobile/src/domain/seq.ts)), drained by the single-flight [src/sync/sync-engine.ts](../apps/mobile/src/sync/sync-engine.ts) and [src/sync/ack-uploader.ts](../apps/mobile/src/sync/ack-uploader.ts).
+- **Reliability** — Sentry error boundary at the root.
+- **Backend** — one origin, the BFF ([src/data/api/auth-ports.ts](../apps/mobile/src/data/api/auth-ports.ts)); each generated client carries its upstream's BFF prefix. One mutator: `apiFetch` (OIDC bearer).
 
 ## Credentials & grant enrollment
 **Two distinct credentials are established at sign-in** — kept separate to avoid confusion:
-1. **App session** — the public PKCE client `lupira-assistant-mobile`; its bearer authorizes the app's calls through the BFF (assistant-api, comms-api) and device registration on location-api + health-api, via the `lupira-{assistant,comms,location,health}-aud` scope mappings. The `offline_access` on this client is the *app's* session longevity.
+1. **App session** — the public PKCE client `lupira-assistant-mobile`; its bearer authorizes the app's calls through the BFF (assistant-api, comms-api) via the `lupira-{assistant,comms}-aud` scope mappings. The `offline_access` on this client is the *app's* session longevity.
 2. **Assistant-api offline grant** — assistant-api is the **confidential** Authentik client `lupira-assistant`. The grant is a per-user refresh token minted to **assistant-api** (encrypted, schema `assistant`), letting it write on-behalf-of the user when the user is absent (a 3am fired prompt). The app does not hold this token; it only triggers its creation.
 
 **Grant enrollment is assistant-api-led.** The app launches the hub's hosted flow (`expo-web-browser`) and the server owns the auth-code dance:
@@ -81,15 +75,14 @@ Everything slots into the **existing** element types — no new layer, no `eslin
 | Piece | Layer | Notes |
 |---|---|---|
 | `inbox-item.ts`, `ack.ts`, `edit-spec.ts`, `thread-page.ts` | `packages/domain` | Shared pure logic: wire→view-model mapping, ack classification, per-kind edit specs, thread-page merging. Cross-frontend, so it lives in the package rather than the app |
-| Generated clients `generated/{assistant,comms,location,health}/` | `data/api/` | Orval output; the assistant + comms targets carry their BFF prefix |
-| `mutators.ts` | `data/api/` | Injects the **OIDC bearer** for the BFF-fronted backends; `DeviceKey` stays for ingest |
-| NDJSON ingest serializer | `data/api/` | Custom request fn through the shared mutator — NDJSON isn't standard JSON, so Orval can't model it |
-| `pending-acks-repo.ts` + `pending_acks` table | `data/db/` | Mirrors `pending-fixes-repo.ts`; reuses `seq.ts` with stream `acks` |
+| Generated clients `generated/{assistant,comms}/` | `data/api/` | Orval output; the assistant + comms targets carry their BFF prefix |
+| `mutators.ts` | `data/api/` | Injects the **OIDC bearer** for the BFF-fronted backends |
+| `pending-acks-repo.ts` + `pending_acks` table | `data/db/` | Uses `seq.ts` with stream `acks` |
 | Inbox cache repo | `data/db/` | Persists the last Inbox fetch for offline read |
 | Enrollment launcher + return handling | `data/auth/` | Opens the hosted `/auth/login?return_uri=`, resolves the deep link |
 | `push-registration.ts`, `push-session.ts` | `data/push/` | Mints + registers the Expo token; drops it on sign-out |
 | `ack-uploader.ts` | `sync/` | acks-stream uploader; drains in seq order inside the sync-engine cycle |
-| `acks` stream registration | `sync/sync-engine.ts` | A second stream alongside `location` |
+| Sync cycle | `sync/sync-engine.ts` | Single-flight; drains the acks stream |
 | `inbox-store.ts` | `state/` | Inbox read + optimistic gestures |
 | `archive-store.ts`, `settings-store.ts` | `state/` | Search / conversations / thread window; preferences + capture status |
 | `InboxScreen.tsx`, `EditProposalScreen.tsx` | `ui/screens/` | Read + resolve/answer; the schema-driven editor |
@@ -128,16 +121,14 @@ The app consumes both backends through Orval-generated clients — one target pe
 **Idempotency:** every write the app may replay carries a client-generated action id, and the hub commits a `ProcessedAction` receipt in the same transaction as the resolution — so a replay returns the recorded outcome instead of re-applying, and an offline approval can retry forever without double-writing downstream.
 
 ## Offline-sync reuse — the `acks` stream
-Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqueues to a `pending_acks` table with a monotonic `acks`-stream `seq`, exactly as location fixes enqueue to `pending_fixes`. The existing sync-engine — single-flight, kicked by NetInfo reconnect, AppState foreground, the background task, and manual triggers — drains them in seq order via `ack-uploader.ts`. Outcomes are classified in the domain (`classifyAckStatus`): 2xx and other-4xx rows are deleted (the gesture is moot server-side — resolved elsewhere, expired, malformed — and the next refresh shows server truth), while 401/408/429/5xx/network stop the drain for retry, preserving order. Net: an approval made offline survives an app kill and replays safely the moment connectivity returns.
+Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqueues to a `pending_acks` table with a monotonic `acks`-stream `seq`. The sync-engine — single-flight, kicked by NetInfo reconnect, AppState foreground, the background task, and manual triggers — drains them in seq order via `ack-uploader.ts`. Outcomes are classified in the domain (`classifyAckStatus`): 2xx and other-4xx rows are deleted (the gesture is moot server-side — resolved elsewhere, expired, malformed — and the next refresh shows server truth), while 401/408/429/5xx/network stop the drain for retry, preserving order. Net: an approval made offline survives an app kill and replays safely the moment connectivity returns.
 
 ## Deferred sections (named, to expand)
 - **Digest batching** — digest mode currently suppresses per-item pushes; the periodic digest that collects them into one notice is the remaining half (a scheduled hub prompt, not app work).
-- **Geofence registration** — the hub supplies geofences; the `collector` layer registers them via `Location.startGeofencingAsync`, turning arrival/departure into location-triggered nudges (leave-by, trip prompts). This reuses the existing background-location foundation.
 - **Web SPA** — `apps/web` beside the mobile app, reusing `packages/domain`; the BFF already carries the cookie/interactive half of the auth story for it.
-- **Self-hosted map view** — render the user's own location history (the brief's deferred "Map view"); the heaviest future item, a tiles surface rather than a connector.
 
 ## Decisions
-1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantBff`, CalWeb's shape: an `exposed.json` allowlist, `/api` + `/<name>-api` prefixes, device ingest at the upstream's path, the bearer forwarded verbatim (upstreams re-validate). No upstream sits on the public edge, and the future SPA gets a same-origin home.
+1. ✅ **One BFF, one public origin** — the app talks only to `LupiraAssistantBff`, CalWeb's shape: an `exposed.json` allowlist, `/api` + `/<name>-api` prefixes, the bearer forwarded verbatim (upstreams re-validate). No upstream sits on the public edge, and the future SPA gets a same-origin home.
 2. ✅ **Monorepo** — mobile + BFF + shared domain in one repo (the cal-web pattern), so pure logic is shared as source instead of copied.
 3. ✅ **Enrollment return leg via `return_uri`** — the hub takes an allow-listed `return_uri` and `/auth/done` 302s to the app's deep link; the allowlist is what keeps it from being an open redirect.
 4. ✅ **One merged `/inbox` feed** with a kind discriminator (proposal · question · notice), not per-kind endpoints — the app renders one chronological queue, so one fetch matches the surface.
@@ -150,4 +141,3 @@ Inbox writes (resolve, answer, read) don't get a bespoke network path. Each enqu
 
 ## Open decisions
 - **Push credential ownership** — Expo-managed credentials vs a self-hosted APNs key / FCM project.
-- **Orval + NDJSON** — keep ingest as a custom request fn through the shared mutator (recommended) vs leaving ingest fully hand-written outside Orval.

@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 /** Every call goes through the assistant BFF — one origin; the path prefix picks the upstream
- *  (`/api` assistant, `/comms-api`, `/location-api`, `/health-api`, device ingest at `/ingest`). */
+ *  (`/api` assistant, `/comms-api`). */
 
 /** 'dev' = the BFF's bypass; it and every upstream accept an `X-Dev-User` header in Development. */
 export type AuthMode = 'oidc' | 'dev';
@@ -51,11 +51,3 @@ export const APP_VERSION = Constants.expoConfig?.version ?? '0.0.0';
 
 /** Public client key, safe to commit. Empty disables crash reporting. */
 export const SENTRY_DSN = '';
-
-/** Below the server's 10k `batch_too_large` cap, with headroom. */
-export const MAX_BATCH_LINES = 9_000;
-
-/** Server guidance: <5 MB. */
-export const MAX_BATCH_BYTES = 5 * 1024 * 1024 - 64 * 1024;
-
-export const UPLOAD_FETCH_LIMIT = 12_000;

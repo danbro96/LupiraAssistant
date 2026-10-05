@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Refreshes the three `backend-*-openapi.json` specs Orval reads by copying the sibling API repos'
+ * Refreshes the `backend-*-openapi.json` specs Orval reads by copying the sibling API repos'
  * build output (`openapi/<Api>.json`, emitted by `dotnet build` via
  * `Microsoft.Extensions.ApiDescription.Server`) — no database or running server needed.
  */
@@ -14,8 +14,6 @@ const appRoot = path.resolve(__dirname, '..');
 const workspaceRoot = path.resolve(__dirname, '../../..');
 
 const SPECS = [
-  { api: 'LupiraLocationApi', out: 'backend-location-openapi.json' },
-  { api: 'LupiraHealthApi', out: 'backend-health-openapi.json' },
   { api: 'LupiraAssistantApi', out: 'backend-assistant-openapi.json' },
   { api: 'LupiraCommsApi', out: 'backend-comms-openapi.json' },
 ];

@@ -7,7 +7,7 @@ export type TabParamList = {
 };
 
 export type RootStackParamList = {
-  RegisterDevice: undefined;
+  SignIn: undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
   Settings: undefined;
   DebugLog: undefined;

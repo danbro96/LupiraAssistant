@@ -7,7 +7,7 @@ EAS build → Play Console internal testing. Package `com.lupira.assistant`, pro
 
 - `eas.json`: `appVersionSource: remote` + `production.autoIncrement` — EAS owns `versionCode`.
 - `version` in `apps/mobile/app.config.ts` is the only human version (`package.json` stays `0.0.0`).
-- Settings → Device shows `<version> · dev | embedded | OTA <id>`; Sentry events (when
+- Settings shows `<version> · dev | embedded | OTA <id>`; Sentry events (when
   `SENTRY_DSN` is set) carry `update_id` and `update_channel` tags.
 
 ## Native release
