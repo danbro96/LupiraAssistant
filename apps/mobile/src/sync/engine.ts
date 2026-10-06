@@ -7,7 +7,7 @@ import { INBOX, INBOX_ID, inboxModule } from './inbox-module';
 import { queryClient } from './queryClient';
 
 export const engine = createSyncEngine({
-  openDb: expoDb(DB_NAME),
+  openDb: expoDb(DB_NAME, { serializeStatements: true }),
   modules: [inboxModule],
   cacheVersion: 1,
   onChange: invalidateOnChange(queryClient),
