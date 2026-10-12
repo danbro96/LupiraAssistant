@@ -6,9 +6,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useArchive } from '../../state/archive-store';
 import type { ArchiveSearchHitDto } from '../../data/api/generated/comms/models';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { Screen } from '@danbro96/lupira-expo-paper/components/Screen';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
+import { SyncBanner } from '../components/SyncBanner';
 
 // Research entry point: hybrid search over the whole corpus. A hit deep-links into its thread,
 // centred on the matched message.
@@ -39,7 +41,7 @@ export function ArchiveSearchScreen() {
   );
 
   return (
-    <View style={styles.screen}>
+    <Screen banner={<SyncBanner />}>
       <View style={styles.controls}>
         <TextField
           label="Search messages"
@@ -84,7 +86,7 @@ export function ArchiveSearchScreen() {
         }
         renderItem={renderItem}
       />
-    </View>
+    </Screen>
   );
 }
 
@@ -111,7 +113,6 @@ const HitRow = memo(function HitRow({ hit, onPress, styles }: HitRowProps) {
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: c.bg },
     controls: { padding: spacing.lg, gap: spacing.sm },
     row: { flexDirection: 'row', gap: spacing.sm },
     grow: { flex: 1 },

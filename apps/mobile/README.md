@@ -64,8 +64,8 @@ Authentik OIDC (PKCE public client); the session lives in the OS secure keystore
 - The inbox is one doc in the `@danbro96/lupira-sync-engine` kernel (`sync/inbox-module.ts`); each gesture
   (resolve / answer / read) is an op in the kernel outbox, written in the same transaction that hides its item.
 - Ops replay in order per item with `Idempotency-Key` = `clientActionId`, which the hub dedups on. Transient
-  failures back off and retry; a rejected gesture is parked (its item stays hidden) and shows in the
-  Developer screen's sync state.
+  failures back off and retry; a rejected gesture is parked (its item stays hidden) and shows on the Sync
+  screen (retry / discard), reached from the status banner over both tabs or from Settings.
 - A sync pushes queued acks, then refetches the inbox. Triggered on connectivity regained, app foreground,
   sign-in, pull-to-refresh, push notices and a periodic `expo-background-task`.
 
@@ -82,7 +82,7 @@ src/
   state/       auth (createAuthStore), the background sync task, inbox and settings hooks (React Query),
                sync status, Zustand archive (conversations/threads/search)
   ui/          screens (inbox, edit-proposal, conversations, thread, archive search, connectors,
-               preferences, settings, sign-in), navigation, theme, shared components
+               preferences, settings, sync, sign-in), navigation, theme, shared components
   config/      cross-cutting leaf (env + secure keys); logger, toast/haptics, Paper kit and OIDC come
                from the @danbro96/lupira-* packages
 ```

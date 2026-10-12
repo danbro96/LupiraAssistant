@@ -12,6 +12,7 @@ export type RootStackParamList = {
   Settings: undefined;
   DebugLog: undefined;
   Developer: undefined;
+  Sync: undefined;
   EditProposal: { itemId: string };
   Conversations: undefined;
   Thread: { conversationId: string; aroundMessageId?: string };

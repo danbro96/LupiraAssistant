@@ -18,8 +18,10 @@ import type { InboxItemView } from '@lupira/assistant-domain/inbox-item';
 import { payloadSlotFor } from '@lupira/assistant-domain/edit-spec';
 import type { RootStackParamList } from '../navigation/types';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
+import { Screen } from '@danbro96/lupira-expo-paper/components/Screen';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
+import { SyncBanner } from '../components/SyncBanner';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
 
 const GRANT_TEXT: Record<GrantStatus, string> = {
@@ -78,34 +80,36 @@ export function InboxScreen() {
   };
 
   return (
-    <FlatList
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      data={items}
-      keyExtractor={(item) => item.id}
-      renderItem={renderItem}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={c.primary} />}
-      ListHeaderComponent={
-        <View style={[styles.card, styles.grantCard]}>
-          <Text style={styles.grantText}>{GRANT_TEXT[grantStatus]}</Text>
-          {grantStatus !== 'connected' ? (
-            <Button
-              title="Connect assistant"
-              onPress={() => void onConnect()}
-              loading={connecting}
-              style={styles.btn}
-            />
-          ) : null}
-        </View>
-      }
-      ListEmptyComponent={
-        <View style={styles.card}>
-          <Text style={styles.empty}>No suggestions yet.</Text>
-          <Text style={styles.emptyHint}>When the assistant has something for you, it shows up here.</Text>
-        </View>
-      }
-      ListFooterComponent={<Text style={styles.footnote}>Gestures queue offline and sync when connected.</Text>}
-    />
+    <Screen banner={<SyncBanner />}>
+      <FlatList
+        style={styles.screen}
+        contentContainerStyle={styles.content}
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={c.primary} />}
+        ListHeaderComponent={
+          <View style={[styles.card, styles.grantCard]}>
+            <Text style={styles.grantText}>{GRANT_TEXT[grantStatus]}</Text>
+            {grantStatus !== 'connected' ? (
+              <Button
+                title="Connect assistant"
+                onPress={() => void onConnect()}
+                loading={connecting}
+                style={styles.btn}
+              />
+            ) : null}
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.card}>
+            <Text style={styles.empty}>No suggestions yet.</Text>
+            <Text style={styles.emptyHint}>When the assistant has something for you, it shows up here.</Text>
+          </View>
+        }
+        ListFooterComponent={<Text style={styles.footnote}>Gestures queue offline and sync when connected.</Text>}
+      />
+    </Screen>
   );
 }
 
@@ -206,7 +210,7 @@ const QuestionCard = memo(function QuestionCard({ item, answer, onAnswerChange, 
 
 const makeStyles = (c: Palette) =>
   StyleSheet.create({
-    screen: { flex: 1, backgroundColor: c.bg },
+    screen: { flex: 1 },
     content: { padding: spacing.lg, gap: spacing.sm },
     card: cardSurface(c),
     grantCard: { gap: spacing.sm },

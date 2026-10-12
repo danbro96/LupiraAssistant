@@ -6,6 +6,7 @@ import { InboxScreen } from '../screens/InboxScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { DebugLogScreen } from '@danbro96/lupira-expo-diagnostics/DebugLogScreen';
 import { DeveloperScreen } from '../screens/DeveloperScreen';
+import { SyncScreen } from '../screens/SyncScreen';
 import { EditProposalScreen } from '../screens/EditProposalScreen';
 import { ArchiveSearchScreen } from '../screens/ArchiveSearchScreen';
 import { ConversationsScreen } from '../screens/ConversationsScreen';
@@ -33,6 +34,7 @@ export function RootStack() {
         <>
           <Stack.Screen name="Tabs" component={TabLayout} options={{ headerShown: false, contentStyle: { paddingBottom: 0 } }} />
           <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+          <Stack.Screen name="Sync" component={SyncScreen} options={{ title: 'Sync' }} />
           <Stack.Screen name="Developer" component={DeveloperScreen} options={{ title: 'Developer' }} />
           <Stack.Screen name="DebugLog" component={DebugLogScreen} options={{ title: 'Debug log' }} />
           <Stack.Screen name="EditProposal" component={EditProposalScreen} options={{ title: 'Edit proposal' }} />

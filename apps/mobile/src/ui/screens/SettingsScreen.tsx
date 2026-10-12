@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { useOnline } from '@danbro96/lupira-expo-query/online';
-import { syncNow, useSyncStatus } from '../../state/sync-status';
+import { useSyncStatus } from '../../state/sync-status';
 import { useAuth } from '../../state/auth-store';
 import { refreshGrant, useGrantStatus } from '../../state/inbox';
 import { usePrefs } from '../../state/prefs-store';
@@ -13,6 +13,7 @@ import { launchConnect } from '../../data/auth/connect';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { IdentityHeader } from '@danbro96/lupira-expo-paper/components/IdentityHeader';
 import { SignOutButton } from '@danbro96/lupira-expo-paper/components/SignOutButton';
+import { syncStatusLine } from '@danbro96/lupira-expo-paper/status';
 import { VersionLine } from '@danbro96/lupira-expo-diagnostics/VersionLine';
 import { spacing, type Palette, useColors } from '../theme';
 import { toast } from '@danbro96/lupira-expo-feedback/toast';
@@ -32,10 +33,6 @@ export function SettingsScreen() {
   const grantStatus = useGrantStatus();
 
   const [connecting, setConnecting] = useState(false);
-
-  function onUploadNow() {
-    void syncNow().then(() => toast('Upload triggered.'));
-  }
 
   async function onConnect() {
     setConnecting(true);
@@ -66,13 +63,7 @@ export function SettingsScreen() {
       </View>
       <List.Item title="Notifications" onPress={() => navigation.navigate('Preferences')} />
       <List.Item title="Sources" onPress={() => navigation.navigate('Connectors')} />
-
-      <List.Subheader>Upload status</List.Subheader>
-      <Row label="Connectivity" value={online ? 'online' : 'offline'} styles={styles} />
-      <Row label="Uploading" value={status.phase !== 'idle' ? 'yes' : 'no'} styles={styles} />
-      <View style={styles.action}>
-        <Button title="Upload now" onPress={onUploadNow} />
-      </View>
+      <List.Item title="Sync" description={syncStatusLine(status, online)} onPress={() => navigation.navigate('Sync')} />
 
       <List.Subheader>Developer</List.Subheader>
       <List.Item
