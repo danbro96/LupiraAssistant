@@ -57,14 +57,10 @@ export function InboxScreen() {
 
   async function onConnect() {
     setConnecting(true);
-    try {
-      const res = await launchConnect(apiUrl);
-      if (res === 'returned') {
-        await refreshGrant();
-        toast('Assistant connection updated.');
-      }
-    } finally {
-      setConnecting(false);
+    const res = await launchConnect(apiUrl);
+    if (res === 'returned') {
+      await refreshGrant();
+      toast('Assistant connection updated.');
     }
   }
 
@@ -100,7 +96,9 @@ export function InboxScreen() {
               <Button
                 title="Connect assistant"
                 onPress={() => {
-                  onConnect().catch(() => toastError('Could not connect the assistant'));
+                  onConnect()
+                    .finally(() => setConnecting(false))
+                    .catch(() => toastError('Could not connect the assistant'));
                 }}
                 loading={connecting}
                 style={styles.btn}
