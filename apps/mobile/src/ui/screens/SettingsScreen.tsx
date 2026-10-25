@@ -16,7 +16,7 @@ import { SignOutButton } from '@danbro96/lupira-expo-paper/components/SignOutBut
 import { syncStatusLine } from '@danbro96/lupira-expo-paper/status';
 import { VersionLine } from '@danbro96/lupira-expo-diagnostics/VersionLine';
 import { spacing, type Palette, useColors } from '../theme';
-import { toast } from '@danbro96/lupira-expo-feedback/toast';
+import { toast, toastError } from '@danbro96/lupira-expo-feedback/toast';
 
 type Styles = ReturnType<typeof makeStyles>;
 
@@ -36,12 +36,15 @@ export function SettingsScreen() {
 
   async function onConnect() {
     setConnecting(true);
-    const res = await launchConnect(apiUrl);
-    if (res === 'returned') {
-      await refreshGrant();
-      toast('Assistant connection updated.');
+    try {
+      const res = await launchConnect(apiUrl);
+      if (res === 'returned') {
+        await refreshGrant();
+        toast('Assistant connection updated.');
+      }
+    } finally {
+      setConnecting(false);
     }
-    setConnecting(false);
   }
 
   return (
@@ -49,7 +52,11 @@ export function SettingsScreen() {
       <IdentityHeader name={user?.name ?? user?.sub ?? 'Not signed in'} sub={user?.name ? user.sub : undefined} />
 
       <List.Subheader>Account</List.Subheader>
-      <SignOutButton onSignOut={() => void useAuth.getState().clearSession()} />
+      <SignOutButton
+        onSignOut={() => {
+          useAuth.getState().clearSession().catch(() => toastError('Sign-out failed'));
+        }}
+      />
 
       <List.Subheader>Assistant</List.Subheader>
       <Row label="Grant" value={grantStatus} styles={styles} />
@@ -57,7 +64,9 @@ export function SettingsScreen() {
         <Button
           title={grantStatus === 'connected' ? 'Reconnect assistant' : 'Connect assistant'}
           variant="secondary"
-          onPress={() => void onConnect()}
+          onPress={() => {
+            onConnect().catch(() => toastError('Could not connect the assistant'));
+          }}
           loading={connecting}
         />
       </View>
@@ -70,7 +79,15 @@ export function SettingsScreen() {
         title="Enable debug"
         description="Show the developer tools and the on-device log"
         right={() => (
-          <Switch value={debugEnabled} onValueChange={(v) => void usePrefs.getState().setDebugEnabled(v)} />
+          <Switch
+            value={debugEnabled}
+            onValueChange={(v) => {
+              usePrefs
+                .getState()
+                .setDebugEnabled(v)
+                .catch(() => toastError('Could not save the setting'));
+            }}
+          />
         )}
       />
       {debugEnabled ? <List.Item title="Developer options" onPress={() => navigation.navigate('Developer')} /> : null}

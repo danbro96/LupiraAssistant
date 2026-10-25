@@ -18,11 +18,11 @@ Notifications.setNotificationHandler({
 /** Subscribe to arrival + tap; returns an unsubscribe. Call once from App.tsx. */
 export function startNotificationHandling(): () => void {
   const received = Notifications.addNotificationReceivedListener(() => {
-    void syncNow();
+    syncNow();
   });
 
   const tapped = Notifications.addNotificationResponseReceivedListener((response) => {
-    void syncNow();
+    syncNow();
     routeNotice(response.notification.request.content.data as NoticeData | undefined);
   });
 

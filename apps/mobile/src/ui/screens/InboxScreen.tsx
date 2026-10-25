@@ -22,7 +22,7 @@ import { Screen } from '@danbro96/lupira-expo-paper/components/Screen';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 import { SyncBanner } from '../components/SyncBanner';
-import { toast } from '@danbro96/lupira-expo-feedback/toast';
+import { toast, toastError } from '@danbro96/lupira-expo-feedback/toast';
 
 const GRANT_TEXT: Record<GrantStatus, string> = {
   connected: 'Assistant connected.',
@@ -52,17 +52,20 @@ export function InboxScreen() {
 
   // Pull-on-open freshness (until push lands): the cached feed renders instantly, then updates.
   useEffect(() => {
-    void syncNow();
+    syncNow();
   }, []);
 
   async function onConnect() {
     setConnecting(true);
-    const res = await launchConnect(apiUrl);
-    if (res === 'returned') {
-      await refreshGrant();
-      toast('Assistant connection updated.');
+    try {
+      const res = await launchConnect(apiUrl);
+      if (res === 'returned') {
+        await refreshGrant();
+        toast('Assistant connection updated.');
+      }
+    } finally {
+      setConnecting(false);
     }
-    setConnecting(false);
   }
 
   const onAnswerChange = (id: string, text: string) => {
@@ -87,14 +90,18 @@ export function InboxScreen() {
         data={items}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} tintColor={c.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
+          onRefresh().catch(() => toastError('Refresh failed'));
+        }} tintColor={c.primary} />}
         ListHeaderComponent={
           <View style={[styles.card, styles.grantCard]}>
             <Text style={styles.grantText}>{GRANT_TEXT[grantStatus]}</Text>
             {grantStatus !== 'connected' ? (
               <Button
                 title="Connect assistant"
-                onPress={() => void onConnect()}
+                onPress={() => {
+                  onConnect().catch(() => toastError('Could not connect the assistant'));
+                }}
                 loading={connecting}
                 style={styles.btn}
               />
@@ -135,7 +142,9 @@ const ProposalCard = memo(function ProposalCard({ item, styles }: { item: InboxI
       <View style={styles.actions}>
         <Button
           title="Approve"
-          onPress={() => void resolveItem(item.id, { action: 'Approve' })}
+          onPress={() => {
+            resolveItem(item.id, { action: 'Approve' }).catch(() => toastError('Could not approve'));
+          }}
           style={styles.actionBtn}
         />
         {editable ? (
@@ -149,7 +158,9 @@ const ProposalCard = memo(function ProposalCard({ item, styles }: { item: InboxI
         <Button
           title="Dismiss"
           variant="destructive"
-          onPress={() => void resolveItem(item.id, { action: 'Dismiss' })}
+          onPress={() => {
+            resolveItem(item.id, { action: 'Dismiss' }).catch(() => toastError('Could not dismiss'));
+          }}
           style={styles.actionBtn}
         />
       </View>
@@ -165,7 +176,9 @@ const NoticeCard = memo(function NoticeCard({ item, styles }: { item: InboxItemV
         <Button
           title="Got it"
           variant="secondary"
-          onPress={() => void markItemRead(item.id)}
+          onPress={() => {
+            markItemRead(item.id).catch(() => toastError('Could not dismiss'));
+          }}
           style={styles.actionBtn}
         />
       </View>
@@ -194,13 +207,17 @@ const QuestionCard = memo(function QuestionCard({ item, answer, onAnswerChange, 
         <Button
           title="Answer"
           disabled={answer.trim().length === 0}
-          onPress={() => void answerItem(item.id, { answer: answer.trim() })}
+          onPress={() => {
+            answerItem(item.id, { answer: answer.trim() }).catch(() => toastError('Could not send the answer'));
+          }}
           style={styles.actionBtn}
         />
         <Button
           title="Skip"
           variant="secondary"
-          onPress={() => void answerItem(item.id, { skip: true })}
+          onPress={() => {
+            answerItem(item.id, { skip: true }).catch(() => toastError('Could not skip'));
+          }}
           style={styles.actionBtn}
         />
       </View>

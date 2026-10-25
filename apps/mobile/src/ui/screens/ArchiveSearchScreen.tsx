@@ -11,6 +11,7 @@ import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 import { SyncBanner } from '../components/SyncBanner';
+import { toastError } from '@danbro96/lupira-expo-feedback/toast';
 
 // Research entry point: hybrid search over the whole corpus. A hit deep-links into its thread,
 // centred on the matched message.
@@ -29,7 +30,10 @@ export function ArchiveSearchScreen() {
   const [participant, setParticipant] = useState('');
 
   function onSearch() {
-    void useArchive.getState().search({ q, participant: participant.trim() || undefined });
+    useArchive
+      .getState()
+      .search({ q, participant: participant.trim() || undefined })
+      .catch(() => toastError('Search failed'));
   }
 
   const onOpenHit = (hit: ArchiveSearchHitDto) => {

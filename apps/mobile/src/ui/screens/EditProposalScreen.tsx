@@ -16,7 +16,7 @@ import {
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { spacing, useColors, type Palette } from '../theme';
-import { toast } from '@danbro96/lupira-expo-feedback/toast';
+import { toast, toastError } from '@danbro96/lupira-expo-feedback/toast';
 import type { RootStackParamList } from '../navigation/types';
 
 // Schema-driven editor: the field specs live in the domain package; this screen renders text inputs
@@ -72,7 +72,9 @@ export function EditProposalScreen() {
     setErrors(errs);
     if (Object.keys(errs).length > 0 || !slot) return;
 
-    void resolveItem(item!.id, { action: 'Edit', edits: { [slot]: next } });
+    resolveItem(item!.id, { action: 'Edit', edits: { [slot]: next } }).catch(() =>
+      toastError('Could not queue the edit'),
+    );
     toast('Edit queued.');
     navigation.goBack();
   }

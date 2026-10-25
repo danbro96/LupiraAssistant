@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useArchive } from '../../state/archive-store';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
+import { detach } from '@danbro96/lupira-expo-diagnostics/log';
+import { toastError } from '@danbro96/lupira-expo-feedback/toast';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
 
@@ -20,8 +22,15 @@ export function ConversationsScreen() {
   const cursor = useArchive((s) => s.conversationsCursor);
   const [q, setQ] = useState('');
 
+  const reload = () => {
+    useArchive
+      .getState()
+      .loadConversations({ q: q.trim() || undefined })
+      .catch(() => toastError('Could not load threads'));
+  };
+
   useEffect(() => {
-    void useArchive.getState().loadConversations();
+    detach(useArchive.getState().loadConversations(), 'archive:conversations');
   }, []);
 
   return (
@@ -33,17 +42,18 @@ export function ConversationsScreen() {
         onChangeText={setQ}
         autoCapitalize="none"
         returnKeyType="search"
-        onSubmitEditing={() => void useArchive.getState().loadConversations({ q: q.trim() || undefined })}
+        onSubmitEditing={reload}
       />
       <FlatList
         data={conversations}
         keyExtractor={(x) => x.id}
         contentContainerStyle={styles.list}
         refreshing={loading && conversations.length === 0}
-        onRefresh={() => void useArchive.getState().loadConversations({ q: q.trim() || undefined })}
+        onRefresh={reload}
         onEndReachedThreshold={0.4}
         onEndReached={() => {
-          if (cursor) void useArchive.getState().loadConversations({ more: true, q: q.trim() || undefined });
+          if (!cursor) return;
+          detach(useArchive.getState().loadConversations({ more: true, q: q.trim() || undefined }), 'archive:more');
         }}
         ListEmptyComponent={
           loading ? (

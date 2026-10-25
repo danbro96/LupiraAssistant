@@ -8,6 +8,7 @@ import type { ConversationMessageDto } from '../../data/api/generated/comms/mode
 import { dayBreakLabel } from '@lupira/assistant-domain/thread-page';
 import { radii, spacing, useColors, type Palette } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
+import { detach } from '@danbro96/lupira-expo-diagnostics/log';
 
 // The list mounts only once data is in: FlashList applies its initial position (the hit, else the bottom) once.
 
@@ -32,7 +33,7 @@ export function ThreadScreen() {
   }, [navigation, threadTitle]);
 
   useEffect(() => {
-    void useArchive.getState().openThread(conversationId, aroundMessageId);
+    detach(useArchive.getState().openThread(conversationId, aroundMessageId), 'archive:thread');
     return () => useArchive.getState().closeThread();
   }, [conversationId, aroundMessageId]);
 
@@ -69,9 +70,9 @@ export function ThreadScreen() {
         initialScrollIndexParams={hitIndex >= 0 ? { viewOffset: -height / 3 } : undefined}
         maintainVisibleContentPosition={{ startRenderingFromBottom: true }}
         onStartReachedThreshold={0.5}
-        onStartReached={() => void useArchive.getState().loadOlder()}
+        onStartReached={() => detach(useArchive.getState().loadOlder(), 'archive:older')}
         onEndReachedThreshold={0.5}
-        onEndReached={() => void useArchive.getState().loadNewer()}
+        onEndReached={() => detach(useArchive.getState().loadNewer(), 'archive:newer')}
         ListHeaderComponent={loadingOlder ? <ActivityIndicator style={styles.spinner} /> : null}
         ListFooterComponent={loadingNewer ? <ActivityIndicator style={styles.spinner} /> : null}
         renderItem={renderItem}

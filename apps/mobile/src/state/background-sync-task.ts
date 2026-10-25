@@ -8,4 +8,5 @@ export const SYNC_TASK = 'lupira.assistant.upload';
 
 defineSyncTask(SYNC_TASK, engine, async () => {
   if (!useAuth.getState().loaded) await useAuth.getState().load();
+  return useAuth.getState().isAuthenticated();
 });

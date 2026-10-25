@@ -23,7 +23,13 @@ export async function deviceKeyFetch<T>(path: string, init: RequestInit = {}): P
   if (!apiKey) throw new ApiError(0, 'No device key — register this device first.');
 
   const send = createBearerMutator({
-    auth: { getApiUrl: port.getApiUrl, getToken: () => null, refresh: async () => null, onSignIn: () => () => {} },
+    auth: {
+      getApiUrl: port.getApiUrl,
+      getToken: () => null,
+      refresh: async () => null,
+      onSignIn: () => () => {},
+      onSignOut: () => () => {},
+    },
     timeoutMs: REQUEST_TIMEOUT_MS,
     decorate: (headers) => headers.set('Authorization', buildDeviceKeyHeader(apiKey)),
   });

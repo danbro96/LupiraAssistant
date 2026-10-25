@@ -5,7 +5,7 @@ import { usePreferences, useSavePreferences } from '../../state/settings';
 import { Button } from '@danbro96/lupira-expo-paper/components/Button';
 import { TextField } from '@danbro96/lupira-expo-paper/components/TextField';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
-import { toast } from '@danbro96/lupira-expo-feedback/toast';
+import { toast, toastError } from '@danbro96/lupira-expo-feedback/toast';
 
 // Delivery preferences: how the assistant may interrupt. Quiet hours hold back the push only — items
 // still land in the inbox, so nothing is lost while you sleep.
@@ -74,7 +74,9 @@ export function PreferencesScreen() {
         />
       </View>
 
-      <Button title="Save" onPress={() => void onSave()} loading={saving} style={styles.save} />
+      <Button title="Save" onPress={() => {
+          onSave().catch(() => toastError('Could not save preferences.'));
+        }} loading={saving} style={styles.save} />
     </ScrollView>
   );
 }

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { mirrorQuery } from '@danbro96/lupira-expo-query/mirrorQuery';
 import type { SyncStatus } from '@danbro96/lupira-sync-engine/status';
+import type { SyncEngine } from '@danbro96/lupira-sync-engine/engine';
 import type { ParkedOp } from '@danbro96/lupira-sync-engine/types';
 import { engine } from '../sync/engine';
 import { INBOX } from '../sync/inbox-module';
@@ -19,7 +20,7 @@ engine.status.subscribe(() => {
   const next = `${pending}/${parked}`;
   if (next === counts) return;
   counts = next;
-  void queryClient.invalidateQueries({ queryKey: PARKED_KEY });
+  queryClient.invalidateQueries({ queryKey: PARKED_KEY });
 });
 
 export function useSyncStatus(): SyncStatus {
@@ -30,6 +31,6 @@ export function useParkedChanges(): ParkedOp[] {
   return useQuery(mirrorQuery(PARKED_KEY, () => engine.parked())).data ?? NO_PARKED;
 }
 
-export const syncNow = (): Promise<void> => engine.sync();
+export const syncNow: SyncEngine['sync'] = () => engine.sync();
 export const retryChange = (commandId: string): Promise<void> => engine.retry(commandId);
 export const discardChange = (commandId: string): Promise<void> => engine.discard(commandId);

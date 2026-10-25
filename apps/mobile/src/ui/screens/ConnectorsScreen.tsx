@@ -3,6 +3,7 @@ import { ActivityIndicator } from 'react-native-paper';
 import { useConnectors } from '../../state/settings';
 import type { ConnectorStatusDto } from '../../data/api/generated/comms/models';
 import { cardSurface, spacing, type Palette, useColors } from '../theme';
+import { toastError } from '@danbro96/lupira-expo-feedback/toast';
 
 // Read-only capture status per source. Connectors are enrolled server-side (ops CLI), so there is
 // nothing to toggle here — this answers "is my mail/Telegram still arriving?".
@@ -22,7 +23,9 @@ export function ConnectorsScreen() {
       refreshControl={
         <RefreshControl
           refreshing={loading && connectors.length > 0}
-          onRefresh={() => void refetch()}
+          onRefresh={() => {
+            refetch().catch(() => toastError('Could not refresh sources'));
+          }}
           tintColor={c.primary}
         />
       }

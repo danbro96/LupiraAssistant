@@ -13,6 +13,7 @@ vi.mock('expo-secure-store', () => ({
   }),
 }));
 vi.mock('expo-auth-session', () => ({ fetchDiscoveryAsync: vi.fn() }));
+vi.mock('react-native', () => ({ AppState: {} }));
 vi.mock('@danbro96/lupira-expo-diagnostics/log', () => ({ logDebug: vi.fn() }));
 vi.mock('@danbro96/lupira-expo-feedback/toast', () => ({ toast: vi.fn() }));
 vi.mock('../data/auth/oidc', () => ({ oidc: { refreshTokens: vi.fn() } }));

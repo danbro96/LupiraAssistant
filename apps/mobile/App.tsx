@@ -24,6 +24,7 @@ import { SYNC_TASK } from './src/state/background-sync-task';
 import { queryClient, persistOptions } from './src/sync/queryClient';
 import { SENTRY_DSN } from './src/config/env';
 import { initSentry } from '@danbro96/lupira-expo-diagnostics/initSentry';
+import { detach } from '@danbro96/lupira-expo-diagnostics/log';
 import { lightColors, darkColors, navDark, navLight, paperDark, paperLight, type Palette } from './src/ui/theme';
 import { paperSettings } from '@danbro96/lupira-expo-paper/theme/paperSettings';
 
@@ -50,16 +51,20 @@ function App() {
 
   useEffect(() => {
     let stopTriggers = () => {};
-    void (async () => {
-      await Promise.all([useAuth.getState().load(), usePrefs.getState().init()]);
-      await useAuth.getState().refreshIfNeeded();
-      stopTriggers = startSyncTriggers(engine, { backgroundTaskName: SYNC_TASK, registerBackgroundTask: !__DEV__ });
-      // Signed in → keep the hub's push registry current, then honor a cold-start notice tap.
-      if (useAuth.getState().isAuthenticated()) void registerPushToken();
-      void handleLaunchNotice();
-    })();
+    const stopAutoRefresh = useAuth.getState().startAutoRefresh();
+    detach(
+      (async () => {
+        await Promise.all([useAuth.getState().load(), usePrefs.getState().init()]);
+        stopTriggers = startSyncTriggers(engine, { backgroundTaskName: SYNC_TASK, registerBackgroundTask: !__DEV__ });
+        // Signed in → keep the hub's push registry current, then honor a cold-start notice tap.
+        if (useAuth.getState().isAuthenticated()) detach(registerPushToken(), 'push:register');
+        detach(handleLaunchNotice(), 'notice:launch');
+      })(),
+      'app:bootstrap',
+    );
     const stopNotifications = startNotificationHandling();
     return () => {
+      stopAutoRefresh();
       stopTriggers();
       stopNotifications();
     };
