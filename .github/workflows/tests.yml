@@ -33,3 +33,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - name: Export bundle
+        working-directory: apps/mobile
+        run: npx expo export --platform android --output-dir ${{ runner.temp }}/expo-export
