@@ -100,7 +100,7 @@ Foundation (layers/eslint-boundaries, PKCE auth, store-and-forward acks queue) m
 ### comms-api
 - **Attachments unwired**: `IAttachmentStore` is the `NoOp` seam; `Message.ObjectKey` never populated; media-only messages dropped at the connector/importer — the corpus is text-only.
 - **Release path skips the per-message principal cross-check** (weak point 3): the payload builder fetches message bodies by id unscoped; contamination is only prevented by the assigner's principal-scoped candidate query.
-- No topic merge (`θ_merge` is a doc knob with zero code) and no LLM topic labels (provisional label = the message's first words).
+- Topic merging is rerank-adjudicated and chat-model-confirmed, and a titler names topics; no splitter exists for an over-merge that already reads as cohesive, and title quality is unreviewed.
 - `archive_search` fusion is concat + id-dedup — the reranker is the sole ranker (no score fusion/RRF). *(The `source` filter now covers Telegram/Facebook/Email.)*
 - The archive browser's conversation list computes `lastMessageAt`/`messageCount` per query (a correlated aggregate); fine at personal scale, a denormalised column if the corpus outgrows it.
 - `GET /topics/{id}` / `get_topic` are not status-restricted — "open-topic tail" is convention, any topic's detail is returned.
