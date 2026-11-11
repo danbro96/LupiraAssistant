@@ -36,6 +36,15 @@ const config: ExpoConfig = {
     ],
     'expo-status-bar',
     'expo-font',
+    [
+      'expo-build-properties',
+      {
+        android: {
+          extraProguardRules:
+            '-keep class * extends androidx.room.RoomDatabase { <init>(); }\n-keepclassmembers class * extends androidx.work.InputMerger { public <init>(); }',
+        },
+      },
+    ],
   ],
   owner: 'danbro96',
   updates: { url: 'https://u.expo.dev/89b3a2d6-094e-4419-bbfd-b3af9b3c50c8' },

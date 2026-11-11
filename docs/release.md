@@ -26,6 +26,9 @@ release is manual (Play's API cannot create it): upload the AAB from `npm run bu
 
 Sideloadable APK: `npm run build:preview` (from `apps/mobile`).
 
+Release builds run R8. `expo-build-properties` (`app.config.ts`) keeps WorkManager's Room database
+and input mergers, which it creates by reflection (`expo-background-task` runs on WorkManager).
+
 ## OTA update (JS-only)
 
 Run the **mobile-ota** workflow (branch `production` or `preview`, plus a message), or
