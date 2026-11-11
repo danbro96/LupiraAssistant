@@ -7,7 +7,7 @@
  */
 
 export type GetInboxParams = {
-status?: string;
-cursor?: string;
-limit?: number;
+  status?: string;
+  cursor?: string;
+  limit?: number;
 };

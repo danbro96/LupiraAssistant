@@ -7,8 +7,8 @@
  */
 
 export type ListTopicsParams = {
-status?: string;
-cursor?: string;
-limit?: number;
-principalId?: string;
+  status?: string;
+  cursor?: string;
+  limit?: number;
+  principalId?: string;
 };

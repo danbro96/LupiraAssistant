@@ -7,5 +7,5 @@
  */
 
 export type GetTopicParams = {
-principalId?: string;
+  principalId?: string;
 };

@@ -8,9 +8,9 @@
 import type { MessageSource } from './messageSource';
 
 export type ListConversationsParams = {
-q?: string;
-source?: MessageSource;
-cursor?: string;
-limit?: number;
-principalId?: string;
+  q?: string;
+  source?: MessageSource;
+  cursor?: string;
+  limit?: number;
+  principalId?: string;
 };

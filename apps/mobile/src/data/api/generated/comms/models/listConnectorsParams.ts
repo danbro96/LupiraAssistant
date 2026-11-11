@@ -7,5 +7,5 @@
  */
 
 export type ListConnectorsParams = {
-principalId?: string;
+  principalId?: string;
 };

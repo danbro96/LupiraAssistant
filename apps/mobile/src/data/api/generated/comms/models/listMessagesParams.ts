@@ -7,9 +7,9 @@
  */
 
 export type ListMessagesParams = {
-around?: string;
-before?: string;
-after?: string;
-limit?: number;
-principalId?: string;
+  around?: string;
+  before?: string;
+  after?: string;
+  limit?: number;
+  principalId?: string;
 };
