@@ -16,7 +16,7 @@ Lupira frontends coherent.
 
 ## Prerequisites
 
-- Node 20+ and npm
+- Node 26.13.1+ and npm 11.10+
 - A **custom dev client** (Expo Go cannot run the background task or push). You'll build one with EAS or
   locally via `expo run:*`.
 - The assistant BFF reachable, and an Authentik `assistant` OIDC application/provider.
