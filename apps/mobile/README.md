@@ -4,7 +4,7 @@ The **assistant surface** (React Native / Expo): an inbox of proposals the assis
 a read-only browser over the captured comms archive, and settings. It reaches the estate through the
 repo's own .NET BFF, which fronts assistant-api, comms-api and health-api.
 
-Architecture and conventions mirror the sibling app **LupiraTasksMobile** (Expo SDK 57, layered
+Architecture and conventions mirror the sibling app **LupiraTasksMobile** (Expo SDK 58, layered
 `domain → data → sync → state → ui` enforced by `eslint-plugin-boundaries`, Zustand, `expo-sqlite`,
 `expo-secure-store`, OIDC via `expo-auth-session`).
 

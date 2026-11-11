@@ -63,7 +63,7 @@ export function ConversationsScreen() {
           )
         }
         ListFooterComponent={
-          loading && conversations.length > 0 ? <ActivityIndicator style={styles.spinner} /> : null
+          loading && conversations.length > 0 ? <ActivityIndicator style={styles.spinner} /> : undefined
         }
         renderItem={({ item }) => (
           <Pressable
