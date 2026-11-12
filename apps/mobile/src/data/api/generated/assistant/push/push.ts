@@ -22,7 +22,7 @@ export const getCreatePushTokenUrl = () => {
 /**
  * @summary Register this device's Expo push token (idempotent on the token).
  */
-export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
+export const createPushToken = async (registerPushTokenRequest: RegisterPushTokenRequest, options?: RequestInit): Promise<void> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -59,7 +59,7 @@ export const getDeletePushTokenUrl = (token: string,) => {
 /**
  * @summary Drop a push token (logout).
  */
-export const deletePushToken = async (token: string, options?: Parameters<typeof apiFetch>[1]): Promise<void> => {
+export const deletePushToken = async (token: string, options?: RequestInit): Promise<void> => {
 
   return apiFetch<void>(getDeletePushTokenUrl(token),
   {

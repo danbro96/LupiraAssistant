@@ -8,6 +8,8 @@ export interface FieldSpec {
   path: readonly string[];
   label: string;
   type: FieldType;
+  /** A field that can't hold a value beside this one. */
+  excludes?: readonly string[];
 }
 
 const EVENT: FieldSpec[] = [
@@ -34,7 +36,8 @@ const CONTACT: FieldSpec[] = [
 
 const TASK: FieldSpec[] = [
   { path: ['title'], label: 'Title', type: 'text' },
-  { path: ['dueAt'], label: 'Due at', type: 'datetime' },
+  { path: ['dueOn'], label: 'Due on', type: 'date', excludes: ['dueAt'] },
+  { path: ['dueAt'], label: 'Due at', type: 'datetime', excludes: ['dueOn'] },
   { path: ['priority'], label: 'Priority', type: 'number' },
   { path: ['assigneeEmail'], label: 'Assignee', type: 'text' },
   { path: ['bill', 'amount'], label: 'Bill amount', type: 'number' },
@@ -119,6 +122,27 @@ export function applyEdit(
   const parent = payload[path[0]];
   if (!isRecord(parent)) return payload;
   return { ...payload, [path[0]]: applyEdit(parent, path.slice(1), value) };
+}
+
+export type SettleResult = { ok: true; payload: Record<string, unknown> } | { ok: false; field: string; error: string };
+
+/** An edited field that holds a value clears the field it excludes; editing both to values is an error. */
+export function settleExclusive(
+  spec: readonly FieldSpec[],
+  payload: Record<string, unknown>,
+  edited: ReadonlySet<string>,
+): SettleResult {
+  let next = payload;
+  for (const f of spec) {
+    const other = f.excludes;
+    if (!other || !edited.has(f.path.join('.')) || getField(next, f.path) == null) continue;
+    if (edited.has(other.join('.')) && getField(next, other) != null) {
+      const otherLabel = spec.find((o) => o.path.join('.') === other.join('.'))?.label ?? other.join('.');
+      return { ok: false, field: f.path.join('.'), error: `Set ${f.label} or ${otherLabel}, not both` };
+    }
+    next = applyEdit(next, other, null);
+  }
+  return { ok: true, payload: next };
 }
 
 /** Value → the string an input renders. Booleans use a switch, never text. */

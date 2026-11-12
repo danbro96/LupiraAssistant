@@ -32,7 +32,7 @@ export const getListTopicsUrl = (params?: ListTopicsParams,) => {
 /**
  * @summary List topics by status (poll alternative to closed-topic push).
  */
-export const listTopics = async (params?: ListTopicsParams, options?: Parameters<typeof apiFetch>[1]): Promise<TopicSummaryDto[]> => {
+export const listTopics = async (params?: ListTopicsParams, options?: RequestInit): Promise<TopicSummaryDto[]> => {
 
   return apiFetch<TopicSummaryDto[]>(getListTopicsUrl(params),
   {
@@ -64,7 +64,7 @@ export const getGetTopicUrl = (id: string,
  * @summary Get a topic with its ordered message window (open-topic tail).
  */
 export const getTopic = async (id: string,
-    params?: GetTopicParams, options?: Parameters<typeof apiFetch>[1]): Promise<TopicDetailDto> => {
+    params?: GetTopicParams, options?: RequestInit): Promise<TopicDetailDto> => {
 
   return apiFetch<TopicDetailDto>(getGetTopicUrl(id,params),
   {

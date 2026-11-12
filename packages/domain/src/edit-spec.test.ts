@@ -6,6 +6,7 @@ import {
   getField,
   inputToField,
   payloadSlotFor,
+  settleExclusive,
   visibleFields,
 } from './edit-spec';
 
@@ -45,6 +46,37 @@ describe('getField / applyEdit', () => {
 
   it('never invents a missing parent', () => {
     expect(applyEdit(payload, ['delivery', 'carrier'], 'DHL')).toBe(payload);
+  });
+});
+
+describe('settleExclusive', () => {
+  const spec = editSpecFor('CreateTask')!;
+  const proposed = { title: 'Pay', dueOn: '2026-11-25' };
+
+  it('setting the time-of-day due clears the date-only one', () => {
+    const next = { ...proposed, dueAt: '2026-11-25T09:00:00+01:00' };
+    expect(settleExclusive(spec, next, new Set(['dueAt']))).toEqual({
+      ok: true,
+      payload: { title: 'Pay', dueOn: null, dueAt: '2026-11-25T09:00:00+01:00' },
+    });
+  });
+
+  it('clearing one due while setting the other is fine', () => {
+    const next = { title: 'Pay', dueOn: null, dueAt: '2026-11-25T09:00:00+01:00' };
+    expect(settleExclusive(spec, next, new Set(['dueOn', 'dueAt']))).toEqual({ ok: true, payload: next });
+  });
+
+  it('editing both dues to values is an error', () => {
+    const next = { ...proposed, dueAt: '2026-11-25T09:00:00+01:00' };
+    expect(settleExclusive(spec, next, new Set(['dueOn', 'dueAt']))).toEqual({
+      ok: false,
+      field: 'dueOn',
+      error: 'Set Due on or Due at, not both',
+    });
+  });
+
+  it('leaves an untouched payload alone', () => {
+    expect(settleExclusive(spec, proposed, new Set(['title']))).toEqual({ ok: true, payload: proposed });
   });
 });
 

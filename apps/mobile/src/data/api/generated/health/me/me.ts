@@ -23,7 +23,7 @@ export const getWhoAmIUrl = () => {
 /**
  * @summary The caller's resolved local identity (JIT-provisioned on first login).
  */
-export const whoAmI = async ( options?: Parameters<typeof apiFetch>[1]): Promise<MeDto> => {
+export const whoAmI = async ( options?: RequestInit): Promise<MeDto> => {
 
   return apiFetch<MeDto>(getWhoAmIUrl(),
   {
@@ -46,7 +46,7 @@ export const getBootstrapMeUrl = () => {
 /**
  * @summary Idempotently ensure the caller has a personal health record; returns it.
  */
-export const bootstrapMe = async ( options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto> => {
+export const bootstrapMe = async ( options?: RequestInit): Promise<HealthRecordDto> => {
 
   return apiFetch<HealthRecordDto>(getBootstrapMeUrl(),
   {

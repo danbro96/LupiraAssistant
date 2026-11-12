@@ -22,7 +22,7 @@ export const getGetAuthStatusUrl = () => {
 /**
  * @summary Whether the caller has a live offline grant (and for which audiences).
  */
-export const getAuthStatus = async ( options?: Parameters<typeof apiFetch>[1]): Promise<AuthStatusResponse> => {
+export const getAuthStatus = async ( options?: RequestInit): Promise<AuthStatusResponse> => {
 
   return apiFetch<AuthStatusResponse>(getGetAuthStatusUrl(),
   {

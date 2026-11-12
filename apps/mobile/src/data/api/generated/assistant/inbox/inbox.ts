@@ -34,7 +34,7 @@ export const getGetInboxUrl = (params?: GetInboxParams,) => {
 /**
  * @summary The caller's feed: pending approvals + open questions (default), or resolved history.
  */
-export const getInbox = async (params?: GetInboxParams, options?: Parameters<typeof apiFetch>[1]): Promise<InboxResponse> => {
+export const getInbox = async (params?: GetInboxParams, options?: RequestInit): Promise<InboxResponse> => {
 
   return apiFetch<InboxResponse>(getGetInboxUrl(params),
   {
@@ -58,7 +58,7 @@ export const getResolveProposalUrl = (id: string,) => {
  * @summary Approve, edit, or dismiss a pending proposal. Idempotent on clientActionId.
  */
 export const resolveProposal = async (id: string,
-    resolveProposalRequest: ResolveProposalRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
+    resolveProposalRequest: ResolveProposalRequest, options?: RequestInit): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -96,7 +96,7 @@ export const getAnswerCheckInUrl = (id: string,) => {
  * @summary Answer or skip an open question. Idempotent on clientActionId.
  */
 export const answerCheckIn = async (id: string,
-    answerCheckInRequest: AnswerCheckInRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
+    answerCheckInRequest: AnswerCheckInRequest, options?: RequestInit): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -134,7 +134,7 @@ export const getMarkNoticeReadUrl = (id: string,) => {
  * @summary Mark a notice read. Idempotent on clientActionId.
  */
 export const markNoticeRead = async (id: string,
-    readNoticeRequest: ReadNoticeRequest, options?: Parameters<typeof apiFetch>[1]): Promise<AckResponse> => {
+    readNoticeRequest: ReadNoticeRequest, options?: RequestInit): Promise<AckResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};

@@ -66,6 +66,12 @@ describe('proposalSummary', () => {
     ).toBe('Create task · due 2026-08-10 00:00 · bill');
   });
 
+  it('summarises a date-only due by its day', () => {
+    expect(
+      proposalSummary({ actionKind: 'CreateTask', task: { title: 'Pay rent', dueOn: '2026-11-25' } }),
+    ).toBe('Create task · due 2026-11-25');
+  });
+
   it('summarises a contact by name', () => {
     expect(
       proposalSummary({ actionKind: 'UpdateContact', contact: { givenName: 'Anna', familyName: 'Berg' } }),

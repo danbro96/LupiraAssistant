@@ -25,7 +25,7 @@ export const getGetProfileUrl = () => {
 /**
  * @summary Get the caller's assistant profile (routing defaults).
  */
-export const getProfile = async ( options?: Parameters<typeof apiFetch>[1]): Promise<ProfileResponse> => {
+export const getProfile = async ( options?: RequestInit): Promise<ProfileResponse> => {
 
   return apiFetch<ProfileResponse>(getGetProfileUrl(),
   {
@@ -48,7 +48,7 @@ export const getSetProfileRoutingUrl = () => {
 /**
  * @summary Set routing defaults (calendar/list/address-book) the assistant writes to.
  */
-export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<ProfileResponse> => {
+export const setProfileRouting = async (routingUpdateRequest: RoutingUpdateRequest, options?: RequestInit): Promise<ProfileResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -85,7 +85,7 @@ export const getGetPreferencesUrl = () => {
 /**
  * @summary Get delivery preferences (per-item vs digest, quiet hours).
  */
-export const getPreferences = async ( options?: Parameters<typeof apiFetch>[1]): Promise<PreferencesResponse> => {
+export const getPreferences = async ( options?: RequestInit): Promise<PreferencesResponse> => {
 
   return apiFetch<PreferencesResponse>(getGetPreferencesUrl(),
   {
@@ -108,7 +108,7 @@ export const getSetPreferencesUrl = () => {
 /**
  * @summary Set delivery preferences. Quiet hours suppress the push only — items still land in the inbox.
  */
-export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: Parameters<typeof apiFetch>[1]): Promise<PreferencesResponse> => {
+export const setPreferences = async (preferencesUpdateRequest: PreferencesUpdateRequest, options?: RequestInit): Promise<PreferencesResponse> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};

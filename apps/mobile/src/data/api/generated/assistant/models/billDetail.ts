@@ -7,7 +7,7 @@
  */
 
 /**
- * A bill to pay. DateTimeOffset? TaskProposal.DueAt is the payment due date.
+ * A bill to pay. The task's due is the payment due date.
  */
 export interface BillDetail {
   /** @nullable */

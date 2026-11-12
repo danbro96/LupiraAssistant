@@ -89,7 +89,7 @@ export function proposalSummary(proposal: unknown): string | null {
 
   const task = asRecord(p.task);
   if (task) {
-    const due = str(task.dueAt)?.replace('T', ' ').slice(0, 16);
+    const due = str(task.dueOn) ?? str(task.dueAt)?.replace('T', ' ').slice(0, 16);
     if (due) parts.push(`due ${due}`);
     if (asRecord(task.bill)) parts.push('bill');
     if (asRecord(task.delivery)) parts.push('delivery');

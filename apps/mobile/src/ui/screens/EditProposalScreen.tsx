@@ -10,6 +10,7 @@ import {
   getField,
   inputToField,
   payloadSlotFor,
+  settleExclusive,
   visibleFields,
   type FieldSpec,
 } from '@lupira/assistant-domain/edit-spec';
@@ -68,6 +69,11 @@ export function EditProposalScreen() {
         continue;
       }
       next = applyEdit(next, f.path, parsed.value);
+    }
+    if (Object.keys(errs).length === 0) {
+      const settled = settleExclusive(fields, next, new Set(Object.keys(drafts)));
+      if (settled.ok) next = settled.payload;
+      else errs[settled.field] = settled.error;
     }
     setErrors(errs);
     if (Object.keys(errs).length > 0 || !slot) return;

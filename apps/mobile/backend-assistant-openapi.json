@@ -1041,14 +1041,14 @@
             ]
           }
         },
-        "description": "A bill to pay. DateTimeOffset? TaskProposal.DueAt is the payment due date."
+        "description": "A bill to pay. The task's due is the payment due date."
       },
       "CalendarClass": {
         "enum": [
           "Agenda",
           "System"
         ],
-        "description": "cal-api's calendar classification — relayed on the fire so Policy can tell agent\n            scaffolding (System) from user records (Agenda). Mirrors LupiraCalApi.Domain.CalendarClass."
+        "description": "Whether a calendar is part of the user's agenda (Agenda) or agent-managed system scaffolding (System)."
       },
       "CalendarKind": {
         "enum": [
@@ -1063,7 +1063,7 @@
           "FoodPlan",
           "Generic"
         ],
-        "description": "cal-api's calendar kind. Mirrors LupiraCalApi.Domain.CalendarKind."
+        "description": "Purpose of a calendar within the standard set. `Group` covers household/family/team."
       },
       "CalendarTarget": {
         "enum": [
@@ -1158,7 +1158,7 @@
             ]
           }
         },
-        "description": "A parcel to receive. DateTimeOffset? TaskProposal.DueAt is the expected arrival."
+        "description": "A parcel to receive. The task's due is the expected arrival."
       },
       "DeliveryMode": {
         "enum": [
@@ -1271,7 +1271,7 @@
             "type": "boolean"
           }
         },
-        "description": "The 202 body for an accepted fire/message: the recorded item id, and whether this was a\n            dedupe hit (a redelivery that recorded nothing new)."
+        "description": "The 202 body of `POST /fires`. `Duplicate` = the dedupe key was already recorded (a lost-ack re-push)."
       },
       "FireRequest": {
         "required": [
@@ -1286,8 +1286,7 @@
         "type": "object",
         "properties": {
           "principalId": {
-            "type": "string",
-            "description": "The owning principal, stamped from calendar ownership and relayed by the worker."
+            "type": "string"
           },
           "itemId": {
             "type": "string",
@@ -1298,7 +1297,6 @@
             "format": "uuid"
           },
           "calendarClass": {
-            "description": "System = agent scaffolding (free CRUD); Agenda = user record (consent-first).",
             "$ref": "#/components/schemas/CalendarClass"
           },
           "calendarKind": {
@@ -1309,8 +1307,7 @@
             "format": "date-time"
           },
           "dedupeKey": {
-            "type": "string",
-            "description": "The cal-side `dedupe_key` (item_id + occurrence_at) — one run per occurrence across retries."
+            "type": "string"
           },
           "expireAfter": {
             "type": [
@@ -1340,7 +1337,7 @@
             ]
           }
         },
-        "description": "The wire contract for `POST /fires` — a due fire pushed by lupira-cal-worker. Carries the\nscheduled-fire context (item/calendar/occurrence/dedupe) plus the calendar classification Policy\nneeds and exactly one of ItemPrompt? FireRequest.Prompt / ItemAction? FireRequest.Action (XOR, validated server-side).\nThe cal doc leaves the body shape open; this mirrors the scheduled_fire columns +\nthe relayed principal_id and calendar class/kind."
+        "description": "The `POST /fires` wire body: a due fire with its scheduled-fire context, the calendar classification\n            Policy needs, and exactly one of ItemPrompt? FireRequest.Prompt/ItemAction? FireRequest.Action."
       },
       "InboundSource": {
         "enum": [
@@ -1512,7 +1509,7 @@
             "type": "boolean"
           }
         },
-        "description": "A deterministic payload executed directly (no LLM). `ParamsJson` carries the frozen\n            params (e.g. a SendCheckIn message + optional follow-up Prompt ref)."
+        "description": "A deterministic payload executed directly (no LLM). `ParamsJson` carries the frozen params (e.g. a SendCheckIn message)."
       },
       "ItemPrompt": {
         "required": [
@@ -1576,7 +1573,7 @@
             "type": "boolean"
           }
         },
-        "description": "An LLM-interpreted, contracted payload → an agent run. Declared at authoring; enforced here at fire."
+        "description": "An LLM-interpreted, contracted payload → an agent run. Declared at authoring time; enforced by assistant-api at fire time."
       },
       "ModelTier": {
         "enum": [
@@ -1597,7 +1594,7 @@
           "Place",
           "None"
         ],
-        "description": "The ProposedAction kind a run is contracted to yield (assistant-api validates against it)."
+        "description": "The ProposedAction kind a run is contracted to yield (assistant-api validates against it; cal-api only stores it)."
       },
       "PingDto": {
         "required": [
@@ -1622,7 +1619,7 @@
             ]
           }
         },
-        "description": "Claims echo for cross-service auth-seam probes; the audiences say which half of a\n            broken seam is misconfigured."
+        "description": "The claims a caller's token resolved to, echoed for cross-service auth-seam probes.\n            Returning the audiences (not a bare 200) lets a failing consumer see which half of the seam\n            is misconfigured."
       },
       "PlaceProposal": {
         "required": [
@@ -1825,7 +1822,7 @@
             "format": "time"
           }
         },
-        "description": "Fire timing (flattened union): OnStart/OnEnd carry nothing; Offset uses `OffsetMinutes`\n            (negative = lead time); AllDayAt uses `AllDayAt` (local wall-clock on the occurrence date)."
+        "description": "Fire timing (flattened union): OnStart/OnEnd carry nothing; Offset uses `OffsetMinutes` (negative = lead time);\n            AllDayAt uses `AllDayAt` (local wall-clock time on the occurrence date)."
       },
       "PromptFireKind": {
         "enum": [
@@ -2047,7 +2044,7 @@
             ]
           }
         },
-        "description": "A reference the fired payload acts on. `Id` for Event/Contact/Task; `Url` for External."
+        "description": "A reference the fired payload acts on. `Id` for Event/Contact/Task/Place; `Url` for External."
       },
       "RefKind": {
         "enum": [
@@ -2219,6 +2216,14 @@
           "title": {
             "type": "string"
           },
+          "dueOn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "A date-only due; `dueAt` only when the time of day is known. At most one is set.",
+            "format": "date"
+          },
           "dueAt": {
             "type": [
               "null",
@@ -2267,7 +2272,7 @@
             ]
           }
         },
-        "description": "A proposed task. Lands on the \"Assistant\" list by default; a BillDetail? TaskProposal.Bill or\n            DeliveryDetail? TaskProposal.Delivery instead routes it to the dedicated \"Bills\"/\"Deliveries\" list, carries its\n            structured fields into the task's metadata, and (with DateTimeOffset? TaskProposal.DueAt) gets a linked cal-api\n            reminder that fires at the due date / arrival. Bills and deliveries are tracked-to-done work, never\n            calendar events."
+        "description": "A proposed task. Lands on the \"Assistant\" list by default; a BillDetail? TaskProposal.Bill or\n            DeliveryDetail? TaskProposal.Delivery instead routes it to the dedicated \"Bills\"/\"Deliveries\" list, carries its\n            structured fields into the task's metadata, and (with a due) gets a linked cal-api reminder that fires at\n            DateTimeOffset? TaskProposal.DueAt, or at 09:00 on a DateOnly? TaskProposal.DueOn day. Bills and deliveries are tracked-to-done\n            work, never calendar events."
       },
       "TopicMessage": {
         "required": [

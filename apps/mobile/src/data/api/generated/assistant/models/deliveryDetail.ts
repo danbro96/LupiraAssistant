@@ -7,7 +7,7 @@
  */
 
 /**
- * A parcel to receive. DateTimeOffset? TaskProposal.DueAt is the expected arrival.
+ * A parcel to receive. The task's due is the expected arrival.
  */
 export interface DeliveryDetail {
   /** @nullable */

@@ -23,7 +23,7 @@ export const getListRecordsUrl = () => {
 /**
  * @summary List the health records the caller owns.
  */
-export const listRecords = async ( options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto[]> => {
+export const listRecords = async ( options?: RequestInit): Promise<HealthRecordDto[]> => {
 
   return apiFetch<HealthRecordDto[]>(getListRecordsUrl(),
   {
@@ -46,7 +46,7 @@ export const getCreateRecordUrl = () => {
 /**
  * @summary Create a health record (the caller becomes its owner).
  */
-export const createRecord = async (createHealthRecordRequest: CreateHealthRecordRequest, options?: Parameters<typeof apiFetch>[1]): Promise<HealthRecordDto> => {
+export const createRecord = async (createHealthRecordRequest: CreateHealthRecordRequest, options?: RequestInit): Promise<HealthRecordDto> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};

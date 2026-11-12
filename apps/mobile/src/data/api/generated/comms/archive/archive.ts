@@ -36,7 +36,7 @@ export const getSearchUrl = (params?: SearchParams,) => {
 /**
  * @summary Hybrid research search over the corpus (semantic + full-text, reranked).
  */
-export const search = async (params?: SearchParams, options?: Parameters<typeof apiFetch>[1]): Promise<ArchiveSearchHitDto[]> => {
+export const search = async (params?: SearchParams, options?: RequestInit): Promise<ArchiveSearchHitDto[]> => {
 
   return apiFetch<ArchiveSearchHitDto[]>(getSearchUrl(params),
   {
@@ -66,7 +66,7 @@ export const getListConnectorsUrl = (params?: ListConnectorsParams,) => {
 /**
  * @summary Capture status per source: granted connectors, message count, last arrival.
  */
-export const listConnectors = async (params?: ListConnectorsParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConnectorStatusDto[]> => {
+export const listConnectors = async (params?: ListConnectorsParams, options?: RequestInit): Promise<ConnectorStatusDto[]> => {
 
   return apiFetch<ConnectorStatusDto[]>(getListConnectorsUrl(params),
   {
@@ -96,7 +96,7 @@ export const getListConversationsUrl = (params?: ListConversationsParams,) => {
 /**
  * @summary List conversations, newest activity first (title filter, cursor-paged).
  */
-export const listConversations = async (params?: ListConversationsParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConversationsResponse> => {
+export const listConversations = async (params?: ListConversationsParams, options?: RequestInit): Promise<ConversationsResponse> => {
 
   return apiFetch<ConversationsResponse>(getListConversationsUrl(params),
   {
@@ -128,7 +128,7 @@ export const getListMessagesUrl = (id: string,
  * @summary A chat-style thread page: latest, before/after an anchor, or around one (search-hit jump).
  */
 export const listMessages = async (id: string,
-    params?: ListMessagesParams, options?: Parameters<typeof apiFetch>[1]): Promise<ConversationMessagesResponse> => {
+    params?: ListMessagesParams, options?: RequestInit): Promise<ConversationMessagesResponse> => {
 
   return apiFetch<ConversationMessagesResponse>(getListMessagesUrl(id,params),
   {

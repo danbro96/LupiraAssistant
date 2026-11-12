@@ -12,12 +12,17 @@ import type { ReplyDetail } from './replyDetail';
 /**
  * A proposed task. Lands on the "Assistant" list by default; a BillDetail? TaskProposal.Bill or
  *             DeliveryDetail? TaskProposal.Delivery instead routes it to the dedicated "Bills"/"Deliveries" list, carries its
- *             structured fields into the task's metadata, and (with DateTimeOffset? TaskProposal.DueAt) gets a linked cal-api
- *             reminder that fires at the due date / arrival. Bills and deliveries are tracked-to-done work, never
- *             calendar events.
+ *             structured fields into the task's metadata, and (with a due) gets a linked cal-api reminder that fires at
+ *             DateTimeOffset? TaskProposal.DueAt, or at 09:00 on a DateOnly? TaskProposal.DueOn day. Bills and deliveries are tracked-to-done
+ *             work, never calendar events.
  */
 export interface TaskProposal {
   title: string;
+  /**
+     * A date-only due; `dueAt` only when the time of day is known. At most one is set.
+     * @nullable
+     */
+  dueOn?: string | null;
   /** @nullable */
   dueAt?: string | null;
   priority?: number;
